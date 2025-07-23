@@ -1,32 +1,4 @@
-<?php
-//Inicia a Sessao
-session_start();
-//Analisando se a variável é considerada definida, isto é,
-//está declarada e é diferente de null
-if(isset($_SESSION["usuarios"]))
-{
-    header("location: index.php");
-}
-if(!empty($_POST["usuarios"]) and !empty($_POST["senha"]))
-{
-    //string de conexão
-    $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
-    //string SQL
-    $sql = "SELECT * FROM usuarios where nome ='".$_POST['usuarios']."' and senha ='".$_POST['senha']. "'";
-    //Executando SQL com a conexão, guardando na string
-    $result = $conn->query($sql);
-    //PDO(PHP Data Object), classe que representa a connection entre PHP e o database server
-    $Usuários = $result->fetch(PDO::FETCH_ASSOC);
-    if(!empty($Usuários))
-    {
-        $_SESSION["usuarios"] = $Usuários["nome"];
-        $_SESSION["senha"] = $Usuários["senha"];
-        header("location: index.php");
-    }
-}
-?>
-
-<!DOCTYPE html>
+<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
@@ -85,25 +57,38 @@ if(!empty($_POST["usuarios"]) and !empty($_POST["senha"]))
 </head>
 <body>
 
-    <form action="Login Teste.php" method="post">
     <div>
-        <h1>Login de Acesso</h1>
-        <label for="text">Nome</label><br>
-        <input type="text" id="usuarios" name="usuarios" placeholder="nome">
+        <form action="Login Teste.php" method="post">
+            <h1>Login de Acesso</h1>
+            <label for="text">Nome</label><br>
+            <input type="text" id="usuarios" name="usuarios" placeholder="nome">
+            <br><br>
+            <label for="senha">Senha</label><br>
+            <input type="password" id="senha" name="senha" placeholder="senha">
+            <br><br>
+            <button>Enviar</button>
+        </form>
         <br><br>
-        <label for="senha">Senha</label><br>
-        <input type="password" id="senha" name="senha" placeholder="senha">
-        <br><br>
-        <button>
-        <a href="Cadastro.html" class="btn btn-danger ml-3">Cadastrar Usuários</a>
-        </button>
-        <br><br>
-        <button>Enviar</button>
+        <a href="Cadastro.html" 
+        style="background-color: dodgerblue; 
+        padding-top: 15px;
+        padding-bottom: 15px;
+        padding-left: 97px;
+        padding-right: 97px;
+        text-align: center;
+        border-radius: 15px;
+        color: white;
+        font-size: 15px;
+        cursor: pointer;">Cadastro</a>
     </div>
-    </form>
 
     <img src="PoderosoChefao.png">
     
     
 </body>
 </html>
+
+<?php
+    include 'Login.php';
+?>
+

@@ -8,7 +8,7 @@ $senha = $_POST['senha'];
 
 try
 {
-   $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
+   $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 
    //string SQL - Inserir os dados na tabela de usuários
    $sql = "INSERT INTO usuarios (nome, email, senha) VALUES ('$nome', '$email', '$senha')";
