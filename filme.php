@@ -107,7 +107,7 @@ if (!$filme) {
         <?=($filme['minutos']) ?> minutos&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<?=($filme['idade']) ?> anos
     </section>
     <aside id="aside-direita">
-        <img src="imagens_diretor.php?id=<?= $filme['id'] ?>" style="width: 50%"> <?= $filme['diretor'] ?> <!-- preguiça de arrumar, faz a boa ae -->
+        <img src="imagem_diretor.php?id=<?= $filme['id'] ?>" style="width: 50%"> <?= $filme['diretor'] ?> <!-- preguiça de arrumar, faz a boa ae -->
         <br><br><!-- Descrição do diretor e dnv desculpa mas arruma ae plz, ele n tem mt coisa pra falar --><?= $filme['descricao_diretor'] ?>
     </aside>
 </body>

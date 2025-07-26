@@ -3,9 +3,9 @@ $pdo = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 $id = $_GET['id'] ?? 0;
 
 // Ativa modo de streaming
-$stmt = $pdo->prepare("SELECT imagem FROM filmes WHERE id = ?");
+$stmt = $pdo->prepare("SELECT imagem_diretor FROM filmes WHERE id = ?");
 $stmt->execute([$id]);
-$stmt->bindColumn('imagem', $imagem, PDO::PARAM_LOB);
+$stmt->bindColumn('imagem_diretor', $imagem, PDO::PARAM_LOB);
 $stmt->fetch(PDO::FETCH_BOUND);
 
 // Verifica e envia a imagem
