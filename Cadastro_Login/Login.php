@@ -5,7 +5,7 @@ session_start();
 //está declarada e é diferente de null
 if(isset($_SESSION["usuarios"]))
 {
-    header("location: index.php");
+    header("location: ../PHP/index.php");
 }
 if(!empty($_POST["usuarios"]) and !empty($_POST["senha"]))
 {
@@ -21,7 +21,7 @@ if(!empty($_POST["usuarios"]) and !empty($_POST["senha"]))
     {
         $_SESSION["usuarios"] = $Usuários["nome"];
         $_SESSION["senha"] = $Usuários["senha"];
-        header("location: index.php");
+        header("location: ../PHP/index.php");
     }
 }
 ?>

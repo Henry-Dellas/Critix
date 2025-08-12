@@ -132,7 +132,7 @@ $filmes = $stmt->fetchAll();
             <p>Bom dia <?php echo $_SESSION["usuarios"]?>, a sua senha é <?php echo $_SESSION ["senha"]?></p>
             <br>
             <p>
-                <a href="logout.php" id="button">Sair da conta</a>
+                <a href="../Cadastro_Login/logout.php" id="button">Sair da conta</a>
             </p>   
         </div>
         <div id="div-img">
