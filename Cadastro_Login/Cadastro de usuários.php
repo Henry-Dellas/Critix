@@ -4,7 +4,7 @@ session_start();
 //Analisando se a variável é considerada definida, isto é, está declarada e é diferente de null
 if(isset($_SESSION["usuario"]))
 {
-    header("location: index.php");
+    header("location: ../Filmes/index.php");
 }
 if(!empty($_POST["usuario"]) and !empty($_POST["senha"]))
 {
@@ -23,7 +23,7 @@ if(!empty($_POST["usuario"]) and !empty($_POST["senha"]))
     {
         $_SESSION["usuario"] = $usuario["nome"];
         $_SESSION["email"] = $usuario["email"];
-        header("location: index.php");
+        header("location: ../Filmes/index.php");
     }
 }
 ?>
