@@ -1,0 +1,20 @@
+/* Container das estrelas */
+.estrelas.overlay {
+    position: absolute;
+    left: 5px;
+    display: flex;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 4px 4px;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+/* Estilo individual para cada estrela */
+.estrelas .estrela {
+    width: 16px;
+    height: 16px;
+    display: inline-block; /* Alterado de block para inline-block */
+    object-fit: contain; /* Garante que a imagem não distorça */
+}
+

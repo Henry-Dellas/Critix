@@ -1,0 +1,45 @@
+body{ margin:0; font-family:Arial, sans-serif; background:#eef1f2; color:#222; }
+.topo{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px; background:#2e8b57; color:#fff; padding:12px 18px; }
+.voltar{ color:#fff; text-decoration:none; }
+.abas{ display:flex; gap:18px; justify-content:center; }
+.aba{ color:#e8f7ef; text-decoration:none; padding:8px 2px; border-bottom:3px solid transparent; }
+.aba.ativo{ color:#fff; border-color:#1a2; }
+.acoes{ display:flex; gap:12px; justify-content:flex-end; }
+.busca{ background:#fff; border-radius:20px; padding:6px 10px; display:flex; align-items:center; gap:6px; min-width:240px; }
+.busca input{ border:none; outline:none; background:transparent; width:100%; }
+.avatar{ width:34px; height:34px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2e8b57; }
+
+.layout-detalhes{ display:grid; grid-template-columns:260px 1fr 320px; gap:24px; padding:22px; }
+
+.capa img{ width:100%; border-radius:10px; box-shadow:0 8px 16px rgba(0,0,0,.15); }
+.titulo-bloco{ margin:18px 0 8px; color:#2e8b57; }
+.rel-livros{ display:flex; gap:12px; flex-wrap:wrap; }
+.rel-card{ width:110px; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.08); padding:6px; cursor:pointer; transition:transform .15s; text-align:center; }
+.rel-card:hover{ transform:translateY(-3px); }
+.rel-card img{ width:100%; border-radius:6px; }
+.rel-card p{ margin:6px 0 0; font-size:12px; height:2.4em; overflow:hidden; }
+
+.titulo-item{ margin:0 0 6px; font-size:28px; }
+.descricao{ margin:12px 0 18px; line-height:1.5; }
+.linha-badges{ display:flex; gap:10px; margin:6px 0 14px; }
+.badge{ background:#e9f7ee; color:#2e8b57; border-radius:20px; padding:6px 10px; font-size:13px; display:inline-flex; align-items:center; gap:6px; }
+.badge.ok{ background:#dcf7df; }
+.linha-metas{ display:flex; gap:28px; align-items:flex-end; margin:6px 0 18px; }
+.meta{ min-width:140px; position:relative; }
+.meta .barra{ display:block; width:120px; height:8px; background:#e0e0e0; border-radius:10px; margin-bottom:6px; }
+.idade{ width:44px; height:44px; border-radius:50%; background:#e0e0e0; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.rotulo{ font-size:12px; color:#666; }
+
+.sub{ margin:10px 0 6px; }
+.tabs{ display:flex; gap:16px; align-items:center; margin-bottom:10px; }
+.tab-btn{ background:transparent; border:none; font-weight:700; border-bottom:3px solid transparent; padding:6px 2px; cursor:pointer; }
+.tab-btn.ativo{ border-color:#222; }
+.comentarios{ background:#fff; border-radius:10px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.comentario{ display:flex; gap:12px; }
+.foto{ width:42px; height:42px; border-radius:50%; background:#2e8b57; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.linha-user{ display:flex; align-items:center; gap:10px; }
+.texto{ margin:6px 0 0; }
+
+.col-dir .autor-card{ background:#2f7a5a; color:#fff; border-radius:12px; padding:16px; box-shadow:0 8px 16px rgba(0,0,0,.15); }
+.autor-foto{ width:84px; height:84px; border-radius:8px; background:#fff2; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:700; margin-bottom:10px; }
+.bio{ line-height:1.45; }
