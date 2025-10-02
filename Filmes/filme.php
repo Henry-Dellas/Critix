@@ -89,7 +89,7 @@ if (!$filme) {
     <aside id="aside-esquerda">
         <!-- POR FAVOR ARRUMA O TAMANHO DA IMAGEM :( 
         (tira da porcentagem e usa valor fixo tipo cm ou px)-->
-        <img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 30%"> <br> <br>
+        <img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 200px"> <br> <br>
         <p style="font-size: 20px">
             Elenco: <!-- dps eu faço isso -->
         </p>

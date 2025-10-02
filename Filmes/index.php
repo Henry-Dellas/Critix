@@ -137,7 +137,7 @@ $filmes = $stmt->fetchAll();
         </div>
         <div id="div-img">
             <?php foreach ($filmes as $filme): ?>
-                <a href="filme.php?id=<?= $filme['id'] ?>"><img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 10%"></a>  
+                <a href="filme.php?id=<?= $filme['id'] ?>"><img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 150px"></a>  
             <?php endforeach; ?>
         </div>
     </main>
