@@ -1,0 +1,64 @@
+-- Database: bancox
+
+-- DROP DATABASE IF EXISTS bancox;
+
+CREATE DATABASE bancox
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'Portuguese_Brazil.1252'
+    LC_CTYPE = 'Portuguese_Brazil.1252'
+    LOCALE_PROVIDER = 'libc'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1
+    IS_TEMPLATE = False;
+
+
+
+
+
+-- Table: public.usuarios
+
+-- DROP TABLE IF EXISTS public.usuarios;
+
+CREATE TABLE IF NOT EXISTS public.usuarios
+(
+    nome character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    senha character varying(16) COLLATE pg_catalog."default",
+    email character varying(100) COLLATE pg_catalog."default",
+    CONSTRAINT usuarios_pkey PRIMARY KEY (nome)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.usuarios
+    OWNER to postgres;
+
+
+
+
+
+-- Table: public.filmes
+
+-- DROP TABLE IF EXISTS public.filmes;
+
+CREATE TABLE IF NOT EXISTS public.filmes
+(
+    id integer NOT NULL DEFAULT nextval('filmes_id_seq'::regclass),
+    nome character varying(150) COLLATE pg_catalog."default",
+    nota numeric(3,1),
+    descricao text COLLATE pg_catalog."default",
+    idade character varying(2) COLLATE pg_catalog."default",
+    minutos numeric(3,0),
+    diretor character varying(30) COLLATE pg_catalog."default",
+    descricao_diretor text COLLATE pg_catalog."default",
+    imagem bytea,
+    imagem_diretor bytea,
+    CONSTRAINT filmes_pkey PRIMARY KEY (id),
+    CONSTRAINT filmes_nota_check CHECK (nota >= 0.0 AND nota <= 10.0)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.filmes
+    OWNER to postgres;
