@@ -83,7 +83,7 @@ $tipoLabel = ucfirst($tipo);
 
 // --- Filme ---
 if ($tipo === "filme") {
-    $url = "https://api.themoviedb.org/3/discover/movie?api_key=$apiKeyTMDB&with_genres=$generoTMDB&language=pt-BR&page=1$paramFiltro";
+    $url = "https://api.themoviedb.org/3/discover/movie?api_key=$apiKeyTMDB&with_genres=$generoTMDB&language=pt-BR&page=1$include_adult=false$paramFiltro";
     $resposta = @file_get_contents($url);
     $data = json_decode($resposta, true);
     $itens = $data["results"] ?? [];
@@ -97,7 +97,7 @@ if ($tipo === "filme") {
 
 // --- Série ---
 } elseif ($tipo === "serie") {
-    $url = "https://api.themoviedb.org/3/discover/tv?api_key=$apiKeyTMDB&with_genres=$generoTMDB&language=pt-BR&page=1$paramFiltro";
+    $url = "https://api.themoviedb.org/3/discover/tv?api_key=$apiKeyTMDB&with_genres=$generoTMDB&language=pt-BR&page=1$include_adult=false$paramFiltro";
     $resposta = @file_get_contents($url);
     $data = json_decode($resposta, true);
     $itens = $data["results"] ?? [];
@@ -158,7 +158,7 @@ if ($tipo === "filme") {
     <p><strong>Filtro escolhido:</strong> <?= htmlspecialchars($filtro) ?></p>
     <hr>
 
-    <?php if ($tipo === "filme" && $itemEscolhido): ?>
+    <?php if ($tipo === "filme" && !empty($itemEscolhido)): ?>
         <h2><?= htmlspecialchars($itemEscolhido["title"]) ?></h2>
         <p><?= htmlspecialchars($itemEscolhido["overview"]) ?></p>
         <?php if ($itemEscolhido["poster_path"]): ?>
@@ -181,15 +181,37 @@ if ($tipo === "filme") {
             // função para traduzir texto usando API gratuita
             function traduzirTexto($texto, $de = "en", $para = "pt-BR") {
                 if (empty($texto)) return $texto;
-                $urlTraducao = "https://api.mymemory.translated.net/get?q=" . urlencode($texto) . "&langpair={$de}|{$para}";
-                $resposta = @file_get_contents($urlTraducao);
-                if ($resposta) {
-                    $dados = json_decode($resposta, true);
-                    if (!empty($dados["responseData"]["translatedText"])) {
-                        return $dados["responseData"]["translatedText"];
-                    }
+
+                // Remove tags HTML
+                $texto = trim(strip_tags($texto));
+
+                // Evita erro de limite de API
+                if (strlen($texto) > 480) {
+                    $texto = substr($texto, 0, 480);
                 }
-                return $texto; //fallback em caso de erro
+
+                $max = 200;
+                $partes = [];
+                $len = mb_strlen($texto, 'UTF-8');
+                for ($offset = 0; $offset < $len; $offset += $max) {
+                    $partes[] = mb_substr($texto, $offset $max, 'UTF-8');
+                }
+                $traducaoFinal = '';
+
+                foreach ($partes as $parte) {
+                    $urlParte = "https://api.mymemory.translated.net/get?q=" . urlencode($parte) . "&langpair={$de}|{$para}";
+                    $respParte = @file_get_contents($urlParte);
+                    if ($respParte) {
+                        $dadosParte = json_decode($respParte, true);
+                        $traducaoFinal .= ($dadosParte["responseData"]["translatedText"] ?? $parte) . ' ';                       
+                    } else {
+                        $traducaoFinal .= $parte . ' ';
+                    }
+                    usleep(150000);
+                }
+                
+                return trim($traducaoFinal);
+                
             }
 
             $tituloTraduzido = traduzirTexto($tituloOriginal);
