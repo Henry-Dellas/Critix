@@ -1,0 +1,37 @@
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #ffffff, #37cf3e);
+  color: #fff;
+  text-align: center;
+  padding: 50px;
+}
+
+.container {
+  background: rgba(0,0,0,0.6);
+  padding: 30px;
+  border-radius: 12px;
+  width: 400px;
+  margin: auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+select, button {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2ecc71;
+}
