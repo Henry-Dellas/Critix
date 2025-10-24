@@ -18,7 +18,9 @@ $filmes = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Página dos filmes</title>
     <meta name="keywords" content="html, css, js, site">
-
+    <script> 
+        import * as utils from 'F:/Microsoft VS Code/glide-3.7.1';
+    </script>
     <style>
         *{padding:0;margin:0;
         vertical-align:baseline;
@@ -31,7 +33,7 @@ $filmes = $stmt->fetchAll();
         }
         body 
         {
-            width: 100vw; 
+            width: 98vw; 
             height: 100vh;
             box-sizing: border-box; 
             font-family: arial, Helvetica, sans-serif;
@@ -87,6 +89,8 @@ $filmes = $stmt->fetchAll();
             position: relative;
             top: 300px;
             left: 1200px;
+            right: 1000px;
+            padding: 10px;
             transform: translate(-50%, -50%);
         }
         header
@@ -107,14 +111,15 @@ $filmes = $stmt->fetchAll();
         {
             background-color: rgba(0, 0, 0, 0.9);
             position: absolute;
-            top: 1000px;
+            top: 350px;
             left: 70%;
+            right: 5%;
             transform: translate(-50%, -50%);
             padding: 130px;
             border-radius: 15px;
             color: white;
-            height: 700px;
-            width: 600px;
+            height: 70px;
+            width: 500px;
            
         }
     </style>
@@ -135,11 +140,12 @@ $filmes = $stmt->fetchAll();
                 <a href="../Cadastro_Login/logout.php" id="button">Sair da conta</a>
             </p>   
         </div>
-        <div id="div-img">
+        <div id="div-filmes">
             <?php foreach ($filmes as $filme): ?>
                 <a href="filme.php?id=<?= $filme['id'] ?>"><img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 150px"></a>  
             <?php endforeach; ?>
         </div>
+        
     </main>
     
   
