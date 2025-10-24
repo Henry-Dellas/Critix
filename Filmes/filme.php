@@ -21,9 +21,12 @@ if (!$filme) {
     die("Filme não encontrado.");
 }
 
-$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora FROM comentarios WHERE filme_id = ? ORDER BY data_hora DESC");
+$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarios WHERE filme_id = ? ORDER BY data_hora ASC");
 $stmt2->execute([$id]);
 $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+$mediaStmt = $conn->prepare("SELECT ROUND(AVG(nota), 1) AS media FROM comentarios WHERE filme_id = ?");
+$mediaStmt->execute([$id]);
+$media = $mediaStmt->fetchColumn();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,6 +102,35 @@ $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
             padding: 10px;
             margin-bottom: 10px;
         }
+        .notas {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .notas input {
+            display: none;
+        }
+
+        .notas label {
+            font-size: 18px;
+            color: gray;
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 5px;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }  
+
+        .notas input:checked + label,
+        .notas label:hover,
+        .notas label:hover ~ label {
+            color: white;
+            background-color: #7ebc9e;
+            border-color: #7ebc9e;
+        }
     </style>
 </head>
 <body>
@@ -115,7 +147,7 @@ $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <section>
         <div style="font-size: 30px">
             <?=($filme['nome']) ?> <br> <br>
-            Nota: <?=($filme['nota']) ?> <!-- Manda as imagens das estrelas q eu do um jeito de deixar bonito -->
+            Nota: <?= $media !== null ? $media . "/10" : "N/A" ?>
         </div>
         <br>
         <!-- Sinopse abaixo -->
@@ -132,22 +164,29 @@ $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
     <div id="comentarios">
         <h2>Comentários</h2>
 
+        <form action="comentario.php" method="post">
+            <input type="hidden" name="filme_id" value="<?= htmlspecialchars($id) ?>">
+            <label>Avaliação (0 a 10):</label><br>
+            <div class="notas">
+                <?php for ($i = 10; $i >= 0; $i--): ?>
+                <input type="radio" id="nota<?= $i ?>" name="nota" value="<?= $i ?>" required>
+                <label for="nota<?= $i ?>"><?= $i ?></label>
+                <?php endfor; ?>
+            </div>
+            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea><br><br>
+            <button type="submit">Enviar comentário</button>
+        </form>
+        <hr>
         <?php if ($comentarios): ?>
             <?php foreach ($comentarios as $c): ?>
                 <div class="comentario">
-                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
+                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — <?= htmlspecialchars($c['notas']) ?> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
             <p>Seja o primeiro a comentar!</p>
         <?php endif; ?>
-
-        <form action="comentario.php" method="post">
-            <input type="hidden" name="filme_id" value="<?= htmlspecialchars($id) ?>">
-            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea><br><br>
-            <button type="submit">Enviar comentário</button>
-        </form>
     </div>
 </body>
 </html>

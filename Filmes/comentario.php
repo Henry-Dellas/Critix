@@ -7,6 +7,7 @@ if (!isset($_SESSION["usuarios"])) {
 
 $usuario = $_SESSION["usuarios"];
 $texto = $_POST['texto'] ?? '';
+$nota = $_POST['nota'] ?? 1;
 $filme_id = $_POST['filme_id'] ?? 0;
 
 if ($texto && $filme_id) {
@@ -14,8 +15,8 @@ if ($texto && $filme_id) {
         $pdo = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $stmt = $pdo->prepare("INSERT INTO comentarios (filme_id, usuario, texto) VALUES (?, ?, ?)");
-        $stmt->execute([$filme_id, $usuario, $texto]);
+        $stmt = $pdo->prepare("INSERT INTO comentarios (filme_id, usuario, texto, nota) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$filme_id, $usuario, $texto, $nota]);
 
         header("Location: filme.php?id=$filme_id");
         exit;
