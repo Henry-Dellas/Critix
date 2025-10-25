@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Recomendador de Filmes, Séries e Livros</title>
+  <link rel="stylesheet" href="EstiloIA.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Recomendador</h1>
+    <form method="POST" action="recomendacao.php">
+      <label for="humor">Como você está se sentindo agora?</label><br>
+      <select name="humor" id="humor" required>
+        <option value="">Selecione...</option>
+        <option value="animado">Animado</option>
+        <option value="triste">Triste</option>
+        <option value="romântico">Romântico</option>
+        <option value="assustado">Assustado</option>
+        <option value="aventureiro">Aventureiro</option>
+        <option value="pensativo">Pensativo</option>
+        <option value="curioso">Curioso</option>
+        <option value="empolgado">Empolgado</option>
+        <option value="sonhador">Sonhador</option>
+      </select>
+      <br><br>
+
+      <label for="tipo">O que você deseja?</label><br>
+      <select name="tipo" id="tipo" required>
+        <option value="">Selecione...</option>
+        <option value="filme">Filme</option>
+        <option value="serie">Série</option>
+        <option value="livro">Livro</option>
+      </select>
+      <br><br>
+
+      <label for="filtro">Filtro:</label><br>
+      <select name="filtro" id="filtro">
+          <option value="popular">Populares</option>
+          <option value="nota_alta">Nota Alta (>=7)</option>
+          <option value="sem_terror">Sem Terror</option>
+          <option value="lancamentos">Lançamentos</option>
+      </select>
+      <br><br>
+
+      <h2>Lembrando: Esta recomendação está com base no site The Movie Database (TMDB)</h2>
+      <h2>A recomendação de Livros está com base no banco de dados do Google Books</h2>
+      <button type="submit">Recomendar</button>
+    </form>
+  </div>
+</body>
+</html>
