@@ -236,14 +236,16 @@ section p strong {
                 <label for="nota<?= $i ?>"><?= $i ?></label>
                 <?php endfor; ?>
             </div>
-            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea><br><br>
+            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
+            <input type="checkbox" id="spoiler" name="spoiler" value=true>
+            <label for="spoiler"> Comentário com spoiler?</label><br><br>
             <button type="submit">Enviar comentário</button>
         </form>
         <hr>
         <?php if ($comentarios): ?>
             <?php foreach ($comentarios as $c): ?>
                 <div class="comentario">
-                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — <?= htmlspecialchars($c['notas']) ?> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
+                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — <?= htmlspecialchars($c['nota']) ?> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
