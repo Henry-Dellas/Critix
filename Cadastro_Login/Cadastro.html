@@ -1,81 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE-edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content ="html, css, js, site">
-    <title>Cadastro</title>
-    <style>
-        body
-        {
-            font-family: arial, Helvetica, sans-serif;
-            background-image: linear-gradient(45deg, cyan, yellow);
-        }
-        div
-        {
-            background-color: rgba(0,0,0,0.9);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 70px;
-            border-radius: 15px;
-            color: white;
-        }
-        input
-        {
-            padding: 15px;
-            border: none;
-            outline: none;
-            font-size: 15px;
-        }
-        button
-        {
-            background-color: dodgerblue;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 15px;
-            color: white;
-            font-size: 15px;
-            cursor: pointer;
-        }
-        button:hover
-        {
-            background-color:lightskyblue;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Critix - Cadastro</title>
+<link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
+
+<style>
+:root {
+    --branco-gelo: #F8F9FA;
+    --cinza-escuro: #343A40;
+    --azul-petroleo: #007B83;
+    --coral: #FF6B6B;
+}
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', Arial, Helvetica, sans-serif; }
+body { height:100vh; display:flex; justify-content:center; align-items:center;
+       background: linear-gradient(135deg, #1e1e2f, #007B83); background-size:800% 800%; animation:gradientMove 120s ease infinite; overflow:hidden; }
+@keyframes gradientMove {0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+
+#emoji-bg { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:-1; }
+.emoji { position:absolute; font-size:24px; animation: float 10s linear infinite; }
+@keyframes float { 0% { transform: translateY(100vh) rotate(0deg); } 100% { transform: translateY(-10vh) rotate(360deg); } }
+
+.cadastro-container { position:relative; z-index:2; background-color:#343A40; padding:40px 60px; border-radius:25px;
+ border:1px solid rgba(255,255,255,0.1); box-shadow:0 20px 40px rgba(0,0,0,0.6); width:460px; text-align:center; color:var(--branco-gelo); transition:all 0.3s ease; }
+.cadastro-container:hover { transform:translateY(-5px); box-shadow:0 25px 50px rgba(0,0,0,0.7); }
+
+h1 { font-family:"Cinzel", serif; font-size:37px; margin-bottom:30px; color: var(--coral); text-transform:uppercase; letter-spacing:2px; text-shadow:0 0 20px rgba(255,107,107,0.7); }
+label { display:block; text-align:left; margin-bottom:8px; font-weight:500; font-size:15px; }
+input { width:100%; padding:14px; margin-bottom:20px; border:none; border-radius:15px; background-color: var(--branco-gelo); color: var(--cinza-escuro); font-size:15px; transition:all 0.3s ease; }
+input:focus { outline:none; box-shadow:0 0 12px var(--azul-petroleo); }
+
+button { background: linear-gradient(45deg, var(--azul-petroleo), var(--coral)); border:none; padding:14px; width:100%; border-radius:15px; color: var(--branco-gelo); font-size:16px; font-weight:600; cursor:pointer; margin-top:25px; transition:all 0.3s ease; }
+button:hover { transform:scale(1.05); box-shadow:0 0 20px var(--coral); }
+
+a { display:inline-block; margin-top:20px; background: linear-gradient(45deg, var(--azul-petroleo), var(--coral)); padding:14px; width:100%; border-radius:15px; color: var(--branco-gelo); font-size:16px; font-weight:600; text-decoration:none; text-align:center; cursor:pointer; transition:all 0.3s ease; }
+a:hover { transform:scale(1.05); box-shadow:0 0 20px var(--coral); }
+
+#notificacao { position: fixed; top:20px; right:20px; z-index:9999; }
+.notificacao-msg { background-color: rgba(0,0,0,0.8); color:#fff; padding:15px 25px; margin-bottom:10px; border-radius:10px; font-weight:600; animation: slideIn 0.5s ease, fadeOut 0.5s ease 3s forwards; }
+.notificacao-sucesso { background-color:#28a745; }
+.notificacao-erro { background-color:#dc3545; }
+.notificacao-aviso { background-color:#ffc107; color:#343A40; }
+@keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes fadeOut { to { opacity:0; transform:translateX(100%); } }
+
+@media(max-width:500px){ .cadastro-container{ width:85%; padding:35px 25px; } h1{ font-size:28px; } }
+</style>
 </head>
 <body>
-    <div>
-        <h2>CADASTRO DE USUÁRIOS</h2>
-        <form action="processar_cadastro.php" method="POST">
-            <label for="nome">Nome</label>
-            <input type="text" id="nome" name="nome" required><br><br>
 
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required><br><br>
+<div id="notificacao"></div>
+<div id="emoji-bg"></div>
 
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" name="senha" required><br><br>
+<div class="cadastro-container">
+    <form id="formCadastro">
+        <h1>Cadastro</h1>
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" placeholder="Digite seu nome" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Digite seu email" required>
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Crie uma senha" required>
+        <button type="submit">Cadastrar</button>
+    </form>
+    <a href="Login Teste.php">Voltar para o Login</a>
+</div>
 
-            <input type="submit" value="Cadastrar"><br><br>
-        </form>
-        <a href="Login Teste.php" 
-        style="background-color: dodgerblue; 
-        padding-top: 0.4cm;
-        padding-right: 5cm;
-        padding-left: 5cm;
-        padding-bottom: 0.4cm;
-        text-align: center;
-        border-radius: 15px;
-        color: white;
-        font-size: 30px;
-        cursor: pointer;">
-            Login
-        </a>
-    </div>              
+<script>
+const emojis = ['🎉','📝','👤','✨','💌','🛡️','🖐️','🔑','👀','📧'];
+const emojiContainer = document.getElementById('emoji-bg');
+for(let i=0;i<25;i++){
+    const span = document.createElement('span');
+    span.classList.add('emoji');
+    span.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    span.style.left = Math.random()*100 + 'vw';
+    span.style.fontSize = 16 + Math.random()*28 + 'px';
+    span.style.animationDuration = 6 + Math.random()*8 + 's';
+    span.style.opacity = 0.5 + Math.random()*0.5;
+    emojiContainer.appendChild(span);
+}
+
+const notificacao = document.getElementById('notificacao');
+function mostrarNotificacao(msg, tipo){
+    const div = document.createElement('div');
+    div.classList.add('notificacao-msg', 'notificacao-' + tipo);
+    div.textContent = msg;
+    notificacao.appendChild(div);
+    setTimeout(()=>div.remove(), 3500);
+}
+
+const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
+
+document.getElementById('formCadastro').addEventListener('submit', function(e){
+    e.preventDefault();
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+
+    if(!nome || !email || !senha){
+        mostrarNotificacao('Erro no preenchimento!', 'erro');
+        return;
+    }
+
+    const existe = usuariosCadastrados.find(u => u.email === email || u.nome === nome);
+    if(existe){
+        mostrarNotificacao('Cadastro já existente!', 'aviso');
+        return;
+    }
+
+    const novoUsuario = {nome, email, senha};
+    usuariosCadastrados.push(novoUsuario);
+    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
+    mostrarNotificacao('Cadastro realizado com sucesso!', 'sucesso');
+    document.getElementById('formCadastro').reset();
+});
+</script>
 </body>
 </html>
-

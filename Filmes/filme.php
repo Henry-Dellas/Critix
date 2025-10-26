@@ -1,11 +1,9 @@
 <?php
-//Inicia a Sessao
 session_start();
-//Analise se a sessao nao esta nula...
-if(!isset($_SESSION["usuarios"]))
-{
+if(!isset($_SESSION["usuarios"])) {
     header("location:Login Teste.php");
 }
+
 $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 $id = $_GET['id'] ?? null;
 
@@ -29,136 +27,201 @@ $mediaStmt->execute([$id]);
 $media = $mediaStmt->fetchColumn();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE-edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Filme teste</title>
-    <meta name="keywords" content="html, css, js, site">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Critix</title>
+<link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
 
-    <style>
-        body
-        {
-           font-family: arial, Helvetica, sans-serif;
-           background-color: white;
-        }
-        header
-        {
-            color: white;
-            position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 50px;
-            font-family: fantasy;
-            background: #7ebc9e;
-            width: 100%;
-            text-align: center;             
-        }
-        #aside-esquerda
-        {
-            position: absolute;
-            top: 20%;
-            left: 4%;
-        }
-        #aside-direita
-        {
-            position: absolute;
-            top: 25%;
-            left: 79%;
-            right: 4%;
-            background-color: #7ebc9e;
-            color: white;
-        }
-        section
-        {
-            position: absolute;
-            top: 20%;
-            left: 21%;
-            right: 22%;
-            text-align: justify;
-        }
-        #botao-pra-voltar
-        {
-            position: absolute;
-            top: 7.25%;
-            left: 4%;
-            width: 3%;
-        }
-        #comentarios {
-            position: absolute;
-            top: 90%;
-            left: 21%;
-            right: 22%;
-            background-color: #f4f4f4;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 30px;
-        }
-        .comentario {
-            background-color: #e9e9e9;
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        .notas {
-            display: flex;
-            flex-direction: row-reverse;
-            justify-content: center;
-            gap: 5px;
-            margin: 10px 0;
-        }
+<style>
+:root {
+    --branco-gelo: #F8F9FA;
+    --cinza-escuro: #343A40;
+    --azul-petroleo: #007B83;
+    --coral: #FF6B6B;
+}
 
-        .notas input {
-            display: none;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        .notas label {
-            font-size: 18px;
-            color: gray;
-            cursor: pointer;
-            padding: 3px 6px;
-            border-radius: 5px;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }  
+body {
+    font-family: "Poppins", Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #007B83);
+    background-size: 800% 800%;
+    animation: gradientMove 120s ease infinite;
+    color: var(--branco-gelo);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
 
-        .notas input:checked + label,
-        .notas label:hover,
-        .notas label:hover ~ label {
-            color: white;
-            background-color: #7ebc9e;
-            border-color: #7ebc9e;
-        }
-    </style>
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#emoji-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+.emoji {
+    position: absolute;
+    font-size: 24px;
+    animation: float 10s linear infinite;
+    opacity: 0.5 + Math.random()*0.5;
+}
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); }
+    100% { transform: translateY(-10vh) rotate(360deg); }
+}
+
+header {
+    font-family: "Cinzel", serif;
+    font-size: 65px;
+    text-align: center;
+    color: var(--coral);
+    text-shadow: 0 0 20px rgba(255,107,107,0.7);
+    margin: 15px 0;
+    letter-spacing: 2px;
+    z-index: 2;
+}
+
+#botao-voltar {
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    width: 30px;     
+    height: 30px;     
+    border-left: 3px solid var(--coral);
+    border-bottom: 3px solid var(--coral);
+    transform: rotate(45deg);
+    cursor: pointer;
+    transition: transform 0.2s;
+    z-index: 2;
+}
+#botao-voltar:hover {
+    transform: rotate(45deg) scale(1.2);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    width: 95%;
+    max-width: 1200px;
+    height: 78vh;
+    padding: 10px;
+    z-index: 2;
+}
+
+#aside-esquerda {
+    flex: 1 1 240px;
+    text-align: center;
+}
+#aside-esquerda img {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+#aside-esquerda p { margin-top: 12px; font-size: 16px; }
+
+section {
+    flex: 2 1 500px;
+    background-color: #343A40; 
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    text-align: justify;
+    overflow-y: auto;
+    max-height: 72vh;
+    scrollbar-width: thin;
+    scrollbar-color: var(--coral) transparent;
+}
+section::-webkit-scrollbar { width: 6px; }
+section::-webkit-scrollbar-thumb { background: var(--coral); border-radius: 10px; }
+
+section h1 {
+    font-size: 26px;
+    color: var(--coral);
+    margin-bottom: 12px;
+}
+section p {
+    font-size: 16.5px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+section p strong {
+    color: var(--coral);
+}
+
+#aside-direita {
+    flex: 1 1 240px;
+    background-color: #343A40; 
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    text-align: center;
+}
+#aside-direita img {
+    width: 80%;
+    max-width: 110px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+#aside-direita p { font-size: 15.5px; margin-bottom: 8px; }
+
+@media(max-width: 900px){
+    .container {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+        padding-bottom: 40px;
+    }
+    header { font-size: 42px; }
+    section { max-height: none; }
+}
+</style>
 </head>
 <body>
-    <header>WORM COFFEE</header>
-    <a href="index.php">
-        <!-- dps coloca outra imagem --><img src="seta-verde.webp" id="botao-pra-voltar">
-    </a>
+
+<div id="emoji-bg"></div>
+
+<header>Critix</header>
+<a href="index.php" id="botao-voltar"></a>
+
+<div class="container">
     <aside id="aside-esquerda">
-        <img src="imagem.php?id=<?= $filme['id'] ?>" style="width: 200px"> <br> <br>
-        <p style="font-size: 20px">
-            Elenco: <!-- dps eu faço isso -->
-        </p>
+        <img src="imagem.php?id=<?= $filme['id'] ?>" alt="<?= htmlspecialchars($filme['nome']) ?>">
+        <p><strong>Elenco:</strong> <!-- preencher depois --></p>
     </aside>
+
     <section>
-        <div style="font-size: 30px">
-            <?=($filme['nome']) ?> <br> <br>
-            Nota: <?= $media !== null ? $media . "/10" : "N/A" ?>
-        </div>
-        <br>
-        <!-- Sinopse abaixo -->
-        <?=($filme['descricao']) ?>
-        <br> <br> <br>
-        Tempo de filme:&emsp;&emsp;&emsp;Classificação etária:<br>
-        <?=($filme['minutos']) ?> minutos&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<?=($filme['idade']) ?> anos
+        <h1><?= htmlspecialchars($filme['nome']) ?></h1>
+        <p><strong>Nota:</strong> <?= htmlspecialchars($filme['nota']) ?></p>
+        <p><?= nl2br(htmlspecialchars($filme['descricao'])) ?></p>
+        <p><strong>Duração:</strong> <?= htmlspecialchars($filme['minutos']) ?> minutos</p>
+        <p><strong>Classificação etária:</strong> <?= htmlspecialchars($filme['idade']) ?> anos</p>
     </section>
+
     <aside id="aside-direita">
-        <img src="imagem_diretor.php?id=<?= $filme['id'] ?>" style="width: 50%"> <?= $filme['diretor'] ?> <!-- preguiça de arrumar, faz a boa ae -->
-        <br><br><!-- Descrição do diretor e dnv desculpa mas arruma ae plz, ele n tem mt coisa pra falar --><?= $filme['descricao_diretor'] ?>
+        <img src="imagem_diretor.php?id=<?= $filme['id'] ?>" alt="<?= htmlspecialchars($filme['diretor']) ?>">
+        <p><strong><?= htmlspecialchars($filme['diretor']) ?></strong></p>
+        <p><?= nl2br(htmlspecialchars($filme['descricao_diretor'])) ?></p>
     </aside>
     <!-- Seção de comentários -->
     <div id="comentarios">
@@ -188,5 +251,23 @@ $media = $mediaStmt->fetchColumn();
             <p>Seja o primeiro a comentar!</p>
         <?php endif; ?>
     </div>
+</div>
+
+<script>
+const emojis = ['🎬','🍿','🎥','⭐','🎭','🎟️','📽️','🎫','🎞️','👏'];
+const emojiContainer = document.getElementById('emoji-bg');
+
+for(let i=0; i<30; i++){
+    const span = document.createElement('span');
+    span.classList.add('emoji');
+    span.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    span.style.left = Math.random()*100 + 'vw';
+    span.style.fontSize = 16 + Math.random()*28 + 'px';
+    span.style.animationDuration = 6 + Math.random()*8 + 's';
+    span.style.opacity = 0.5 + Math.random()*0.5;
+    emojiContainer.appendChild(span);
+}
+</script>
+
 </body>
 </html>
