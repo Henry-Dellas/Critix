@@ -1,33 +1,44 @@
 <?php
-//Obtendo os dados do formulário
-$nome = $_POST['nome'];
-$email = $_POST['email'];
-$senha = $_POST['senha'];
+session_start();
+$msg = '';
 
-//string de conexão
+if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $nome = trim($_POST['nome'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $senha = trim($_POST['senha'] ?? '');
 
-try
-{
-   $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+    if(!$nome || !$email || !$senha){
+        $msg = urlencode("Preencha todos os campos!");
+        header("Location: Cadastro.html?msg=$msg");
+        exit;
+    }
 
-   //string SQL - Inserir os dados na tabela de usuários
-   $sql = "INSERT INTO usuarios (nome, email, senha) VALUES ('$nome', '$email', '$senha')";
+    try {
+        $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-   $result = $conn->query($sql);
+        $stmt = $conn->prepare("SELECT * FROM usuarios WHERE nome = :nome OR email = :email");
+        $stmt->execute([':nome'=>$nome, ':email'=>$email]);
+        $existe = $stmt->fetch(PDO::FETCH_ASSOC);
 
-   if($result)
-   {
-      echo "Usuário cadastrado com sucesso!";
-   }else
-   {
-      echo "Erro ao cadastrar o usuário: ".$conn->error;
-   }
+        if($existe){
+            $msg = urlencode("Usuário já cadastrado!");
+            header("Location: Cadastro.html?msg=$msg");
+            exit;
+        }
+
+        $stmt = $conn->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (:nome, :email, :senha)");
+        $stmt->execute([':nome'=>$nome, ':email'=>$email, ':senha'=>$senha]);
+
+        $msg = urlencode("Cadastro realizado com sucesso!");
+        header("Location: LoginTeste.php?msg=$msg");
+        exit;
+
+    } catch(Exception $e){
+        $msg = urlencode("Erro no servidor: " . $e->getMessage());
+        header("Location: Cadastro.html?msg=$msg");
+        exit;
+    }
 }
-catch(Exception $e)
-{
-    echo 'Possível erro de excessão: ', $e->getMessage(), "\n";
-}
-
-//Fechar a conexão com o banco de dados
-$conn = null;
 ?>
+
