@@ -137,6 +137,7 @@ header {
     <h1 id="bemvindo">Bem-vindo, <?php echo htmlspecialchars($_SESSION["usuarios"]); ?>.</h1>
     <div>
         <!-- 🔗 Caminho corrigido -->
+        <a href="../SobreNos.php" id="button-indicacoes">Sobre Nós</a>
         <a href="../IA/testeIA.html" id="button-indicacoes">Ir para Indicações</a>
         <a href="../Cadastro_Login/logout.php" id="button">Sair da conta</a>
     </div>
