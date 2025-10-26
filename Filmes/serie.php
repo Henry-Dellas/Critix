@@ -11,41 +11,38 @@ if (!$id || !is_numeric($id)) {
     die("ID inválido.");
 }
 
-// 🔍 Busca informações do filme na API TMDb
-$tipo = "movie";
-$baseUrl = "https://api.themoviedb.org/3/movie/$id?api_key=$apikeyTMDB&language=pt-BR";
-$creditUrl = "https://api.themoviedb.org/3/movie/$id/credits?api_key=$apikeyTMDB&language=pt-BR";
+// 🔍 Busca informações da série na API TMDb
+$tipo = "tv";
+$baseUrl = "https://api.themoviedb.org/3/tv/$id?api_key=$apikeyTMDB&language=pt-BR";
+$creditUrl = "https://api.themoviedb.org/3/tv/$id/credits?api_key=$apikeyTMDB&language=pt-BR";
 
-$filmeData = json_decode(file_get_contents($baseUrl), true);
+$serieData = json_decode(file_get_contents($baseUrl), true);
 $creditData = json_decode(file_get_contents($creditUrl), true);
 
-if (!$filmeData || isset($filmeData["success"]) && $filmeData["success"] === false) {
-    die("Filme não encontrado.");
+if (!$serieData || (isset($serieData["success"]) && $serieData["success"] === false)) {
+    die("Série não encontrada.");
 }
 
 // 🎥 Informações principais
-$titulo = $filmeData["title"] ?? "Título indisponível";
-$sinopse = $filmeData["overview"] ?: "Sem descrição disponível.";
-$nota = $filmeData["vote_average"] ? number_format($filmeData["vote_average"], 1) : "-";
-$duracao = $filmeData["runtime"] ? $filmeData["runtime"] . " min" : "Duração não informada";
-$lancamento = $filmeData["release_date"] ?? "Desconhecida";
-$generos = array_column($filmeData["genres"], "name");
-$poster = $filmeData["poster_path"]
-    ? "https://image.tmdb.org/t/p/w500" . $filmeData["poster_path"]
+$titulo = $serieData["name"] ?? "Título indisponível";
+$sinopse = $serieData["overview"] ?: "Sem descrição disponível.";
+$nota = $serieData["vote_average"] ? number_format($serieData["vote_average"], 1) : "-";
+$temporadas = $serieData["number_of_seasons"] . " temporadas";
+$episodios = $serieData["number_of_episodes"] . " episódios";
+$lancamento = $serieData["first_air_date"] ?? "Desconhecida";
+$generos = array_column($serieData["genres"], "name");
+$poster = $serieData["poster_path"]
+    ? "https://image.tmdb.org/t/p/w500" . $serieData["poster_path"]
     : "https://via.placeholder.com/300x450?text=Sem+Imagem";
-$backdrop = $filmeData["backdrop_path"]
-    ? "https://image.tmdb.org/t/p/original" . $filmeData["backdrop_path"]
+$backdrop = $serieData["backdrop_path"]
+    ? "https://image.tmdb.org/t/p/original" . $serieData["backdrop_path"]
     : "https://via.placeholder.com/1200x600?text=Sem+Fundo";
 
-// 🎬 Elenco e diretor
+// 🎬 Elenco principal
 $elenco = array_slice(array_column($creditData["cast"], "name"), 0, 5);
-$diretor = "";
-foreach ($creditData["crew"] as $membro) {
-    if ($membro["job"] === "Director") {
-        $diretor = $membro["name"];
-        break;
-    }
-}
+
+// Diretor / Criador
+$criador = $serieData['created_by'][0]['name'] ?? "Não informado";
 
 $stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarios WHERE filme_id = ? ORDER BY data_hora ASC");
 $stmt2->execute([$id]);
@@ -242,14 +239,18 @@ section p strong {
         <h1><?= htmlspecialchars($titulo) ?></h1>
         <p><strong>Média dos usuários:</strong> <?= $media ? $media : "Sem avaliações ainda" ?></p>
         <p><strong>Nota TMDb:</strong> <?= $nota ?></p>
-        <p><strong>Duração:</strong> <?= $duracao ?></p>
+        <p><strong>Temporadas:</strong> <?= $temporadas ?></p>
+        <p><strong>Episódios:</strong> <?= $episodios ?></p>
         <p><strong>Gêneros:</strong> <?= htmlspecialchars(implode(', ', $generos)) ?></p>
         <p><?= nl2br(htmlspecialchars($sinopse)) ?></p>
     </section>
 
     <aside id="aside-direita">
         <h3>Direção</h3>
-        <p><strong><?= htmlspecialchars($diretor ?: "Não informado") ?></strong></p>
+        <p><strong><?= htmlspecialchars($criador ?: "Não informado") ?></strong></p>
+        <br><br>
+        <h3>Elenco</h3>
+        <p><strong><?= htmlspecialchars(implode(', ', $elenco ?: "Não informado")) ?></strong></p>
     </aside>
 
     <!-- Seção de comentários -->
