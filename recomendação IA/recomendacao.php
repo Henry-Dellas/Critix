@@ -194,7 +194,7 @@ if ($tipo === "filme") {
                 $partes = [];
                 $len = mb_strlen($texto, 'UTF-8');
                 for ($offset = 0; $offset < $len; $offset += $max) {
-                    $partes[] = mb_substr($texto, $offset $max, 'UTF-8');
+                    $partes[] = mb_substr($texto, $offset, $max, 'UTF-8');
                 }
                 $traducaoFinal = '';
 
@@ -203,7 +203,7 @@ if ($tipo === "filme") {
                     $respParte = @file_get_contents($urlParte);
                     if ($respParte) {
                         $dadosParte = json_decode($respParte, true);
-                        $traducaoFinal .= ($dadosParte["responseData"]["translatedText"] ?? $parte) . ' ';                       
+                        $traducaoFinal .= ($dadosParte["responseData"]["translatedText"] ?? $parte);
                     } else {
                         $traducaoFinal .= $parte . ' ';
                     }
