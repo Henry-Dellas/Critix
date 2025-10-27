@@ -134,7 +134,7 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
 <body>
 
 <!-- Botão de voltar ajustado -->
-<a href="index.php" id="botao-voltar"></a>
+<a href="Filmes/index.php" id="botao-voltar"></a>
 
 <div id="emoji-bg"></div>
 

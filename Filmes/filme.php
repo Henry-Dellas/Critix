@@ -3,7 +3,7 @@ session_start();
 if(!isset($_SESSION["usuarios"])) {
     header("location:Login Teste.php");
 }
-$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
+$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 $apikeyTMDB = "7a4a474069f49e3f759f137ccfa33365";
 $id = $_GET['id'] ?? null;
 
