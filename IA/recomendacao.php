@@ -150,10 +150,55 @@ html,body{width:100%;height:100%;overflow:hidden;background:linear-gradient(135d
                 <h2><?= htmlspecialchars($itemEscolhido['name']) ?></h2>
                 <p><?= htmlspecialchars($itemEscolhido['overview']) ?></p>
             </div>
-        <?php elseif($tipo==="livro"&&$itemEscolhido):
-            $info=$itemEscolhido['volumeInfo']; $titulo=htmlspecialchars($info['title']??'Livro');
-            $descricao=htmlspecialchars($info['description']??'Sem descrição disponível');
-            $imagem=htmlspecialchars($info['imageLinks']['thumbnail']??'https://via.placeholder.com/150x220?text=Sem+Imagem');
+            <?php elseif ($tipo === "livro" && $itemEscolhido): ?>        
+        <?php 
+            $info = $itemEscolhido["volumeInfo"];
+            $tituloOriginal = htmlspecialchars($info["title"]);
+            $descricaoOriginal = htmlspecialchars($info["description"] ?? "Sem descrição disponível");
+
+            // função para traduzir texto usando API gratuita
+            function traduzirTexto($texto, $de = "en", $para = "pt-BR") {
+                if (empty($texto)) return $texto;
+
+                // Remove tags HTML
+                $texto = trim(strip_tags($texto));
+
+                // Evita erro de limite de API
+                if (strlen($texto) > 480) {
+                    $texto = substr($texto, 0, 480);
+                }
+
+                $max = 200;
+                $partes = [];
+                $len = mb_strlen($texto, 'UTF-8');
+                for ($offset = 0; $offset < $len; $offset += $max) {
+                    $partes[] = mb_substr($texto, $offset, $max, 'UTF-8');
+                }
+                $traducaoFinal = '';
+
+                foreach ($partes as $parte) {
+                    $urlParte = "https://api.mymemory.translated.net/get?q=" . urlencode($parte) . "&langpair={$de}|{$para}";
+                    $respParte = @file_get_contents($urlParte);
+                    if ($respParte) {
+                        $dadosParte = json_decode($respParte, true);
+                        $traducaoFinal .= ($dadosParte["responseData"]["translatedText"] ?? $parte);
+                    } else {
+                        $traducaoFinal .= $parte . ' ';
+                    }
+                    usleep(150000);
+                }
+                
+                return trim($traducaoFinal);
+                
+            }
+
+            $tituloTraduzido = traduzirTexto($tituloOriginal);
+            $descricaoTraduzida = traduzirTexto($descricaoOriginal);
+
+            $titulo = htmlspecialchars($tituloTraduzido, ENT_QUOTES, 'UTF-8');
+            $descricao = htmlspecialchars($descricaoTraduzida, ENT_QUOTES, 'UTF-8');
+            $imagem = $info["imageLinks"]["thumbnail"] ?? "https://via.placeholder.com/150x220?text=Sem+Imagem";
+            $link = $info["infoLink"] ?? "#";
         ?>
             <div class="poster"><img src="<?= $imagem ?>" alt="Capa"></div>
             <div class="textos">

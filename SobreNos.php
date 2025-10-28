@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Critix</title>
+<title>Critix - Sobre Nós</title>
 <link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -134,7 +134,7 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
 <body>
 
 <!-- Botão de voltar ajustado -->
-<a href="index.php" id="botao-voltar"></a>
+<a href="Filmes/index.php" id="botao-voltar"></a>
 
 <div id="emoji-bg"></div>
 
@@ -224,12 +224,8 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
         </ul>
       </div>
     </div>
-
-    <!-- Linha de copyright + TMDB -->
-    <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center; color:var(--texto-secundario); font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
-      <img src="WhatsApp_Image_2025-10-27_at_20.08.58-convertido-de-jpeg-removebg-preview.png" alt="TMDB" style="height:1em;">
-      <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
-      <span>&copy; 2023 DataMind - Todos os direitos reservados</span>
+    <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center; color:var(--texto-secundario); font-size:0.9rem;">
+      &copy; 2023 DataMind - Todos os direitos reservados
     </div>
   </div>
 </footer>
