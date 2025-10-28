@@ -57,14 +57,14 @@ a:hover { transform:scale(1.05); box-shadow:0 0 20px var(--coral); }
 <div id="emoji-bg"></div>
 
 <div class="cadastro-container">
-    <form id="formCadastro" action="processar_cadastro.php" method="POST">
+    <form id="formCadastro">
         <h1>Cadastro</h1>
         <label for="usuario">Nome</label>
-        <input type="text" id="usuario" placeholder="Digite seu nome" name="nome" required>
+        <input type="text" id="usuario" placeholder="Digite seu nome" required>
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Digite seu email" name="email" required>
+        <input type="email" id="email" placeholder="Digite seu email" required>
         <label for="senha">Senha</label>
-        <input type="password" id="senha" placeholder="Crie uma senha" name="senha" required>
+        <input type="password" id="senha" placeholder="Crie uma senha" required>
         <button type="submit">Cadastrar</button>
     </form>
     <a href="Login Teste.php">Voltar para o Login</a>
@@ -93,7 +93,31 @@ function mostrarNotificacao(msg, tipo){
     setTimeout(()=>div.remove(), 3500);
 }
 
+const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]');
 
+document.getElementById('formCadastro').addEventListener('submit', function(e){
+    e.preventDefault();
+    const nome = document.getElementById('usuario').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+
+    if(!nome || !email || !senha){
+        mostrarNotificacao('Erro no preenchimento!', 'erro');
+        return;
+    }
+
+    const existe = usuariosCadastrados.find(u => u.email === email || u.nome === nome);
+    if(existe){
+        mostrarNotificacao('Cadastro já existente!', 'aviso');
+        return;
+    }
+
+    const novoUsuario = {nome, email, senha};
+    usuariosCadastrados.push(novoUsuario);
+    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados));
+    mostrarNotificacao('Cadastro realizado com sucesso!', 'sucesso');
+    document.getElementById('formCadastro').reset();
+});
 </script>
 </body>
 </html>
