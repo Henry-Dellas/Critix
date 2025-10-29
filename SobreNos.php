@@ -17,7 +17,6 @@
     --texto-secundario: #a8e6cf;
 }
 
-/* Reset e fontes */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', Arial, Helvetica, sans-serif; }
 body { 
     background: linear-gradient(135deg, #1e1e2f, #007B83); 
@@ -28,14 +27,12 @@ body {
     overflow-x: hidden;
 }
 
-/* Animação do background */
 @keyframes gradientMove { 
     0% { background-position: 0% 50%; } 
     50% { background-position: 100% 50%; } 
     100% { background-position: 0% 50%; } 
 }
 
-/* Botão de Voltar estilo seta */
 #botao-voltar {
     position: fixed;
     top: 20px;
@@ -53,10 +50,8 @@ body {
     transform: rotate(45deg) scale(1.2);
 }
 
-/* Container */
 .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
-/* Títulos de seções */
 .section-title h2 {
     font-family: "Cinzel", serif;
     font-size: 3rem;
@@ -66,14 +61,12 @@ body {
     margin-bottom: 2rem;
 }
 
-/* About - Nossa História */
 .about-content { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2rem; margin-bottom: 40px; }
 .about-text { flex: 1; min-width: 300px; line-height: 1.6; text-align: justify; color: var(--texto-claro); }
 .about-image { flex: 1; min-width: 300px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
 .about-image img { width: 100%; height: auto; display: block; transition: transform 0.5s ease; }
 .about-image img:hover { transform: scale(1.05); }
 
-/* Mission & Vision */
 .mission-vision { background-color: var(--fundo-escuro); padding: 50px 0; }
 .mv-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; }
 .mv-card { background: var(--fundo-claro); padding: 2rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.5); flex: 1; min-width: 300px; max-width: 500px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; color: var(--texto-claro); }
@@ -81,7 +74,6 @@ body {
 .mv-card i { font-size: 2.5rem; color: var(--cor-destaque); margin-bottom: 1rem; }
 .mv-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--cor-destaque); }
 
-/* Values */
 .values { padding: 50px 0; }
 .values-grid { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
 .value-card { background: var(--fundo-claro); padding: 2rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.5); flex: 1; min-width: 250px; max-width: 300px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; color: var(--texto-claro); }
@@ -89,7 +81,6 @@ body {
 .value-card i { font-size: 2rem; color: var(--cor-destaque); margin-bottom: 1rem; }
 .value-card h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--cor-destaque); }
 
-/* Team */
 .team { 
     background-color: var(--fundo-escuro); 
     padding: 50px 0; 
@@ -101,20 +92,17 @@ body {
 }
 .team img:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(255,107,107,0.6); }
 
-/* Footer */
 footer { background-color: var(--fundo-escuro); color: var(--texto-claro); padding: 3rem 0; text-align: center; }
 .footer-links a:hover { color: var(--cor-destaque); }
 .social-icons a { display:flex; align-items:center; justify-content:center; width:40px; height:40px; background-color: var(--cor-destaque); color: var(--fundo-escuro); border-radius:50%; text-decoration:none; transition: transform 0.3s, background-color 0.3s; }
 .social-icons a:hover { transform: translateY(-3px); background-color: var(--texto-secundario) !important; }
 
-/* Responsividade */
 @media (max-width: 768px) { 
     .values-grid { flex-direction: column; gap: 1.5rem; }
     .mv-container { flex-direction: column; gap: 1.5rem; }
     .team img { width: 90%; }
 }
 
-/* Emoji Background Suave e Infinito */
 #emoji-bg { 
     position: fixed; 
     top: 0; left: 0; 
@@ -133,7 +121,6 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
 </head>
 <body>
 
-<!-- Botão de voltar ajustado -->
 <a href="index.php" id="botao-voltar"></a>
 
 <div id="emoji-bg"></div>
@@ -225,7 +212,6 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
       </div>
     </div>
 
-    <!-- Linha de copyright + TMDB -->
     <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center; color:var(--texto-secundario); font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
       <img src="WhatsApp_Image_2025-10-27_at_20.08.58-convertido-de-jpeg-removebg-preview.png" alt="TMDB" style="height:1em;">
       <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
@@ -267,7 +253,6 @@ function createEmoji() {
     animate();
 }
 
-// Cria 20 emojis flutuando suavemente
 for(let i=0;i<20;i++){
     createEmoji();
 }
