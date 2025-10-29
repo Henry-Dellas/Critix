@@ -3,7 +3,7 @@ session_start();
 if(!isset($_SESSION["usuarios"])) {
     header("location:Login Teste.php");
 }
-$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
 $apikeyTMDB = "7a4a474069f49e3f759f137ccfa33365";
 $id = $_GET['id'] ?? null;
 
@@ -250,7 +250,14 @@ section p strong {
         <p><strong><?= htmlspecialchars($criador ?: "Não informado") ?></strong></p>
         <br><br>
         <h3>Elenco</h3>
-        <p><strong><?= htmlspecialchars(implode(', ', $elenco ?: "Não informado")) ?></strong></p>
+        <?php
+        if (!empty($elenco)) {
+        echo '<p><strong>' . htmlspecialchars(implode(', ', $elenco)) . '</strong></p>';
+        } else {
+        echo '<p><strong>Elenco não disponível para esta série.</strong></p>';
+        }
+        ?>
+
     </aside>
 
     <!-- Seção de comentários -->

@@ -6,7 +6,7 @@ if(isset($_SESSION["usuario"]))
 }
 if(!empty($_POST["usuario"]) and !empty($_POST["senha"]))
 {
-    $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
+    $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
     $sql = "SELECT * FROM usuarios where nome = '".$_POST['usuario']."' and senha = '".$_POST['senha']. "'";
     $result = $conn->query($sql);
     $usuario = $result->fetch(PDO::FETCH_ASSOC);

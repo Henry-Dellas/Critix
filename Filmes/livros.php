@@ -4,54 +4,40 @@ if(!isset($_SESSION["usuarios"])) {
     header("location:Login Teste.php");
     exit;
 }
+
 $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
-$apikeyTMDB = "7a4a474069f49e3f759f137ccfa33365";
+
 $id = $_GET['id'] ?? null;
-
-if (!$id || !is_numeric($id)) {
-    die("ID inválido.");
+if (!$id) {
+    die("ID do livro não informado.");
 }
 
-// 🔍 Busca informações do filme na API TMDb
-$tipo = "movie";
-$baseUrl = "https://api.themoviedb.org/3/movie/$id?api_key=$apikeyTMDB&language=pt-BR";
-$creditUrl = "https://api.themoviedb.org/3/movie/$id/credits?api_key=$apikeyTMDB&language=pt-BR";
+// 🔍 Busca informações do livro na API Google Books
+$baseUrl = "https://www.googleapis.com/books/v1/volumes/$id";
+$livroData = json_decode(file_get_contents($baseUrl), true);
 
-$filmeData = json_decode(file_get_contents($baseUrl), true);
-$creditData = json_decode(file_get_contents($creditUrl), true);
-
-if (!$filmeData || isset($filmeData["success"]) && $filmeData["success"] === false) {
-    die("Filme não encontrado.");
+if (!$livroData || isset($livroData["error"])) {
+    die("Livro não encontrado.");
 }
 
-// 🎥 Informações principais
-$titulo = $filmeData["title"] ?? "Título indisponível";
-$sinopse = $filmeData["overview"] ?: "Sem descrição disponível.";
-$nota = $filmeData["vote_average"] ? number_format($filmeData["vote_average"], 1) : "-";
-$duracao = $filmeData["runtime"] ? $filmeData["runtime"] . " min" : "Duração não informada";
-$lancamento = $filmeData["release_date"] ?? "Desconhecida";
-$generos = array_column($filmeData["genres"], "name");
-$poster = $filmeData["poster_path"]
-    ? "https://image.tmdb.org/t/p/w500" . $filmeData["poster_path"]
-    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
-$backdrop = $filmeData["backdrop_path"]
-    ? "https://image.tmdb.org/t/p/original" . $filmeData["backdrop_path"]
-    : "https://via.placeholder.com/1200x600?text=Sem+Fundo";
+$info = $livroData["volumeInfo"] ?? [];
 
-// 🎬 Elenco e diretor
-$elenco = array_slice(array_column($creditData["cast"], "name"), 0, 5);
-$diretor = "";
-foreach ($creditData["crew"] as $membro) {
-    if ($membro["job"] === "Director") {
-        $diretor = $membro["name"];
-        break;
-    }
-}
+// 📚 Informações principais
+$titulo = $info["title"] ?? "Título indisponível";
+$autores = isset($info["authors"]) ? implode(", ", $info["authors"]) : "Autor não informado";
+$descricao = $info["description"] ?? "Sem descrição disponível";
+$nota = isset($info["averageRating"]) ? number_format($info["averageRating"], 1) : "-";
+$lancamento = $info["publishedDate"] ?? "Desconhecida";
+$categorias = isset($info["categories"]) ? implode(", ", $info["categories"]) : "Sem categorias";
+$poster = $info["imageLinks"]["thumbnail"] 
+    ?? "https://via.placeholder.com/300x450?text=Sem+Imagem";
 
-$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarios WHERE filme_id = ? ORDER BY data_hora ASC");
+// Comentários do usuário
+$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarios WHERE livro_id = ? ORDER BY data_hora ASC");
 $stmt2->execute([$id]);
 $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-$mediaStmt = $conn->prepare("SELECT ROUND(AVG(nota), 1) AS media FROM comentarios WHERE filme_id = ?");
+
+$mediaStmt = $conn->prepare("SELECT ROUND(AVG(nota), 1) AS media FROM comentarios WHERE livro_id = ?");
 $mediaStmt->execute([$id]);
 $media = $mediaStmt->fetchColumn();
 ?>
@@ -60,9 +46,8 @@ $media = $mediaStmt->fetchColumn();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Critix</title>
+<title>Critix - Livro</title>
 <link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
-
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -365,7 +350,6 @@ section p strong {
 </style>
 </head>
 <body>
-
 <div id="emoji-bg"></div>
 
 <header>Critix</header>
@@ -374,21 +358,23 @@ section p strong {
 <div class="container">
     <aside id="aside-esquerda">
         <img src="<?= $poster ?>" alt="<?= htmlspecialchars($titulo) ?>">
-        <p><strong>Lançamento:</strong> <?= date("d/m/Y", strtotime($lancamento)) ?></p>
+        <p><strong>Publicado:</strong> <?= htmlspecialchars($lancamento) ?></p>
     </aside>
 
     <section>
         <h1><?= htmlspecialchars($titulo) ?></h1>
+        <p><strong>Autores:</strong> <?= htmlspecialchars($autores) ?></p>
         <p><strong>Média dos usuários:</strong> <?= $media ? $media : "Sem avaliações ainda" ?></p>
-        <p><strong>Nota TMDb:</strong> <?= $nota ?></p>
-        <p><strong>Duração:</strong> <?= $duracao ?></p>
-        <p><strong>Gêneros:</strong> <?= htmlspecialchars(implode(', ', $generos)) ?></p>
-        <p><?= nl2br(htmlspecialchars($sinopse)) ?></p>
+        <p><strong>Nota Google Books:</strong> <?= $nota ?></p>
+        <p><strong>Categorias:</strong> <?= htmlspecialchars($categorias) ?></p>
+        <p><?= nl2br(htmlspecialchars($descricao)) ?></p>
     </section>
 
     <aside id="aside-direita">
-        <h3>Direção</h3>
-        <p><strong><?= htmlspecialchars($diretor ?: "Não informado") ?></strong></p>
+        <h3>Informações</h3>
+        <p><strong>ISBN:</strong> <?= htmlspecialchars($info["industryIdentifiers"][0]["identifier"] ?? "Não informado") ?></p>
+        <p><strong>Páginas:</strong> <?= $info["pageCount"] ?? "Não informado" ?></p>
+        <p><strong>Editora:</strong> <?= htmlspecialchars($info["publisher"] ?? "Não informada") ?></p>
     </aside>
 
     <!-- Seção de comentários -->
@@ -396,7 +382,7 @@ section p strong {
         <h2>Comentários</h2>
 
         <form action="comentario.php" method="post">
-            <input type="hidden" name="filme_id" value="<?= htmlspecialchars($id) ?>">
+            <input type="hidden" name="livro_id" value="<?= htmlspecialchars($id) ?>">
             <label>Avaliação (0 a 10):</label><br>
             <div class="notas">
                 <?php for ($i = 10; $i >= 0; $i--): ?>
@@ -419,20 +405,16 @@ section p strong {
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
-            <textarea name="texto" placeholder="Escreva seu comentário..." required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-            <?php else: ?>
-                <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
-            <?php endif; ?>
-        </div>
+        <?php else: ?>
+            <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
-cconst emojis = ['🎬','🍿','📚','🎥','😄','🤩','⭐','🎶','📖','🎭','😎','🥳','🍿','🎉'];
+// Mesma lógica de emojis flutuantes do filme.php
+const emojis = ['📚','🎓','📖','🤓','🎉','⭐','🤩'];
 const emojiContainer = document.getElementById('emoji-bg');
-
 for(let i=0; i<25; i++){
     const span = document.createElement('span');
     span.classList.add('emoji');

@@ -172,7 +172,7 @@ header {
     <select id="tipo" style="padding:10px 15px; border-radius:8px; font-size:16px;">
         <option value="movie" selected>Filmes</option>
         <option value="tv">Séries</option>
-        <option value="book">Livros</option> 
+        <option value="livro">Livros</option> 
     </select>
 </div>
 
@@ -233,8 +233,27 @@ const generos = {
         {id:18, name:"Drama"},
         {id:10765, name:"Fantasia & Ficção"},
         {id:80, name:"Crime"},
+    ],
+    livro: [
+        {id: "fiction", name: "Ficção"},
+        {id: "romance", name: "Romance"},
+        {id: "horror", name: "Terror"},
+        {id: "history", name: "História"},
+        {id: "science", name: "Ciência"}
     ]
 };
+
+// Busca livros pelo gênero
+async function fetchBooks(category) {
+    try {
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${category}&maxResults=10&langRestrict=pt`);
+        const data = await response.json();
+        return data.items || [];
+    } catch (error) {
+        console.error("Erro ao buscar livros:", error);
+        return [];
+    }
+}
 
 async function fetchMedia(tipo = "movie", generoId = null, page = 1) {
   const url = `https://api.themoviedb.org/3/discover/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&sort_by=popularity.desc&page=${page}&include_adult=false${generoId ? "&with_genres=" + generoId : ""}`;
@@ -268,8 +287,6 @@ async function fetchMedia(tipo = "movie", generoId = null, page = 1) {
   return filtered;
 }
 
-
-
 function createMediaSlide(item, tipo) {
     const imageUrl = item.poster_path
         ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
@@ -291,17 +308,19 @@ function createMediaSlide(item, tipo) {
     `;
 }
 
-async function initCarrossels(tipo="movie"){
+// Atualiza a função initCarrossels para suportar livros
+async function initCarrossels(tipo = "movie") {
     const container = document.getElementById("carrossel-principal");
     container.innerHTML = ""; // limpa antes de inserir
+    container.style.display = "block"; // garante que container seja exibido
 
-    for (const genero of generos[tipo]){
+    for (const genero of generos[tipo]) {
         // Cria container do gênero
         const generoContainer = document.createElement("div");
         generoContainer.classList.add("carrossel-gen");
         generoContainer.innerHTML = `
             <div id="carrossel-container">
-                <h2 style="color:white; margin-bottom:15px;">🎬 ${genero.name}</h2>
+                <h2 style="color:white; margin-bottom:15px;">${tipo === "livro" ? "📚" : "🎬"} ${genero.name}</h2>
                 <div class="swiper mySwiper">
                     <div class="swiper-wrapper" id="swiper-${tipo}-${genero.id}"></div>
                 </div>
@@ -309,19 +328,54 @@ async function initCarrossels(tipo="movie"){
         `;
         container.appendChild(generoContainer);
 
-        // Busca mídias do gênero
-        const mediaList = await fetchMedia(tipo, genero.id);
         const wrapper = document.getElementById(`swiper-${tipo}-${genero.id}`);
-        wrapper.innerHTML = mediaList.map(item => createMediaSlide(item, tipo)).join("");
+        let slidesHtml = "";
+
+        if (tipo === "livro") {
+            // Busca livros pelo gênero
+            const livros = await fetchBooks(genero.id);
+            slidesHtml = livros.map(book => {
+                const info = book.volumeInfo || {};
+                const title = info.title || "Título indisponível";
+                const imageUrl = info.imageLinks?.thumbnail 
+                    ? info.imageLinks.thumbnail.replace("http:", "https:") 
+                    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+                const description = info.description 
+                    ? info.description.substring(0, 100) + "..." 
+                    : "Sem descrição disponível";
+
+                return `
+                    <div class="swiper-slide">
+                        <a href="livros.php?id=${book.id}" class="slide-link">
+                            <img src="${imageUrl}" alt="${title}" class="poster">
+                            <div class="slide-info">
+                                <strong>${title}</strong><br>
+                                📖 ${description}
+                            </div>
+                        </a>
+                    </div>
+                `;
+            }).join("");
+        } else {
+            // Filmes ou séries
+            const mediaList = await fetchMedia(tipo, genero.id);
+            slidesHtml = mediaList.map(item => createMediaSlide(item, tipo)).join("");
+        }
+
+        wrapper.innerHTML = slidesHtml;
 
         // Inicializa Swiper
-        new Swiper(`#swiper-${tipo}-${genero.id}`).init(); // evita conflito de IDs
         new Swiper(`#carrossel-container .mySwiper`, {
             slidesPerView: 5,
             spaceBetween: 15,
             loop: true,
             autoplay: { delay: 2500, disableOnInteraction: false },
-            breakpoints: { 0:{slidesPerView:1},600:{slidesPerView:2},900:{slidesPerView:4},1200:{slidesPerView:5} }
+            breakpoints: {
+                0: { slidesPerView: 1 },
+                600: { slidesPerView: 2 },
+                900: { slidesPerView: 4 },
+                1200: { slidesPerView: 5 }
+            }
         });
     }
 }

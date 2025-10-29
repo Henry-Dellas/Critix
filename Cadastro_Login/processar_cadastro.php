@@ -14,7 +14,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
 
     try {
-        $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
+        $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $conn->prepare("SELECT * FROM usuarios WHERE nome = :nome OR email = :email");
