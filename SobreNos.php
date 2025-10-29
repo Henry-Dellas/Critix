@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Critix</title>
+<title>Critix - Sobre Nós</title>
 <link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -121,7 +121,7 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
 </head>
 <body>
 
-<a href="index.php" id="botao-voltar"></a>
+<a href="Filmes/index.php" id="botao-voltar"></a>
 
 <div id="emoji-bg"></div>
 
