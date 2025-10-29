@@ -404,6 +404,7 @@ section p strong {
                 <label for="nota<?= $i ?>"><?= $i ?></label>
                 <?php endfor; ?>
             </div>
+            <input type="hidden" name="tipo" value="filme">
             <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
             <input type="hidden" name="spoiler" value="0">
             <input type="checkbox" id="spoiler" name="spoiler" value="1">
@@ -419,9 +420,6 @@ section p strong {
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
-            <textarea name="texto" placeholder="Escreva seu comentário..." required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
             <?php else: ?>
                 <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
             <?php endif; ?>
