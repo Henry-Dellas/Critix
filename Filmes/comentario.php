@@ -9,17 +9,22 @@ $usuario = $_SESSION["usuarios"];
 $texto = $_POST['texto'] ?? '';
 $nota = $_POST['nota'] ?? 1;
 $filme_id = $_POST['filme_id'] ?? 0;
-$spoiler = isset($_POST['spoiler']) ? true : false;
+$tipo = $_POST['tipo'] ?? 'filme';
+$spoiler = isset($_POST['spoiler']) && $_POST['spoiler'] == "on" ? 1 : 0;
 
 if ($texto && $filme_id) {
     try {
-        $pdo = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+        $pdo = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $pdo->prepare("INSERT INTO comentarios (filme_id, usuario, texto, nota, spoiler) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$filme_id, $usuario, $texto, $nota]);
+        $stmt->execute([$filme_id, $usuario, $texto, $nota, $spoiler]);
 
-        header("Location: filme.php?id=$filme_id");
+        if ($tipo === "serie") {
+            header("Location serie.php?id=$filme_id");
+        } else {
+            header("Location: filme.php?id=$filme_id");
+        }
         exit;
     } catch (PDOException $e) {
         die("Erro ao salvar comentário: " . $e->getMessage());

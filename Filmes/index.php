@@ -146,6 +146,8 @@ header {
     #area-texto { flex-direction: column; align-items: stretch; gap: 20px; } 
     #bemvindo { font-size: 1.5em; text-align: center; } 
 }
+
+
 </style>
 </head>
 <body>
@@ -170,8 +172,30 @@ header {
     <select id="tipo" style="padding:10px 15px; border-radius:8px; font-size:16px;">
         <option value="movie" selected>Filmes</option>
         <option value="tv">Séries</option>
+        <option value="book">Livros</option> 
     </select>
 </div>
+
+<!-- 🔍 Barra de Pesquisa -->
+<div id="search-container" style="text-align:center; margin-bottom:25px;">
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Buscar filmes ou séries..." 
+    style="padding:10px 15px; border-radius:8px; font-size:16px; width:50%; max-width:400px;"
+  >
+  <button id="searchButton" style="padding:10px 20px; border-radius:8px; background:#FF6B6B; color:white; border:none; cursor:pointer;">
+    Pesquisar
+  </button>
+  <button id="clearButton" style="padding:10px 20px; border-radius:8px; background:#007B83; color:white; border:none; cursor:pointer; display:none;">
+    Limpar busca
+  </button>
+</div>
+
+<!-- 🔎 Resultados da Pesquisa -->
+<div id="searchResults" style="display:none;"></div>
+
+
 
 <!-- Carrosséis por gênero -->
 <div id="carrossel-principal"></div>
@@ -212,13 +236,38 @@ const generos = {
     ]
 };
 
-async function fetchMedia(tipo="movie", generoId=null, page=1){
-    let url = `https://api.themoviedb.org/3/discover/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&sort_by=popularity.desc&page=${page}`;
-    if (generoId) url += `&with_genres=${generoId}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.results;
+async function fetchMedia(tipo = "movie", generoId = null, page = 1) {
+  const url = `https://api.themoviedb.org/3/discover/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&sort_by=popularity.desc&page=${page}&include_adult=false${generoId ? "&with_genres=" + generoId : ""}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+  const results = data.results || [];
+
+  const adultKeywords = [
+    "porn", "xxx", "erotic", "adult", "sex", "18+", "nude", "explicit", "hot", "sensual",
+    "ligaw", "bold", "temptation", "affair", "lust", "seduction" // adiciona aqui as palavras que quiser
+  ];
+
+  // função para detectar conteúdo adulto
+  function isAdultContent(item) {
+    if (item.adult === true) return true;
+
+    const textToCheck = `
+      ${item.title || ""} 
+      ${item.original_title || ""} 
+      ${item.name || ""} 
+      ${item.original_name || ""} 
+      ${item.overview || ""}
+    `.toLowerCase();
+
+    return adultKeywords.some(word => textToCheck.includes(word));
+  }
+
+  const filtered = results.filter(item => !isAdultContent(item));
+
+  return filtered;
 }
+
 
 
 function createMediaSlide(item, tipo) {
@@ -277,6 +326,136 @@ async function initCarrossels(tipo="movie"){
     }
 }
 
+// 🔎 Função para buscar filmes/séries na TMDb
+async function searchMedia(query, tipo="movie") {
+  if (!query.trim()) return [];
+
+  if (tipo === "book") {
+    const apiKeyGoogle = "";
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20&langRestrict=pt`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.items || [];
+  } else {
+  const url = `https://api.themoviedb.org/3/search/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&query=${encodeURIComponent(query)}&include_adult=false`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.results || [];
+  }
+}
+
+// 🧩 Cria cartões de resultados de pesquisa
+function createSearchCard(item, tipo) {
+    if (tipo === "book") {
+    const info = item.volumeInfo || {};
+    const imageUrl = info.imageLinks?.thumbnail || "https://via.placeholder.com/300x450?text=Sem+Imagem";
+    const title = info.title || "Título indisponível";
+    const authors = info.authors ? info.authors.join(", ") : "Autor desconhecido";
+    const description = info.description ? info.description.substring(0, 100) + "..." : "Sem descrição.";
+    const previewLink = info.previewLink || "#";
+
+    return `
+      <div style="
+        background:#2e2e38;
+        border-radius:15px;
+        padding:10px;
+        margin:10px;
+        text-align:center;
+        color:white;
+        width:180px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.4);
+        transition:transform 0.3s;
+      " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+        <a href="${previewLink}" target="_blank" style="text-decoration:none; color:white;">
+          <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
+          <div style="margin-top:8px;">
+            <strong>${title}</strong><br>
+            <small>${authors}</small><br>
+            <p style="font-size:12px; margin-top:5px; opacity:0.8;">${description}</p>
+          </div>
+        </a>
+      </div>
+    `;
+  } else {  
+  const imageUrl = item.poster_path
+    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+  const title = item.title || item.name || "Título indisponível";
+  const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
+  const id = item.id;
+
+  const link = tipo === "movie" ? `filme.php?id=${id}` : `serie.php?id=${id}`;
+  
+
+  return `
+    <div style="
+      background:#2e2e38;
+      border-radius:15px;
+      padding:10px;
+      margin:10px;
+      text-align:center;
+      color:white;
+      width:180px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.4);
+      transition:transform 0.3s;
+    " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+      <a href="${link}" style="text-decoration:none; color:white;">
+        <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
+        <div style="margin-top:8px;">
+          <strong>${title}</strong><br>
+          ⭐ ${nota} / 10
+        </div>
+      </a>
+    </div>
+  `;
+  }
+}
+
+// 🔍 Evento do botão de pesquisa
+document.getElementById("searchButton").addEventListener("click", async () => {
+  const query = document.getElementById("searchInput").value;
+  const tipo = document.getElementById("tipo").value;
+  const resultsDiv = document.getElementById("searchResults");
+  const carrosselDiv = document.getElementById("carrossel-principal");
+  const clearButton = document.getElementById("clearButton");
+
+  resultsDiv.style.display = "block";
+  resultsDiv.innerHTML = "<p style='color:white; text-align:center;'>🔎 Buscando...</p>";
+
+  const results = await searchMedia(query, tipo);
+
+  if (results.length === 0) {
+    resultsDiv.innerHTML = "<p style='color:white; text-align:center;'>Nenhum resultado encontrado 😢</p>";
+    return;
+  }
+
+  // Oculta os carrosséis
+  carrosselDiv.style.display = "none";
+  clearButton.style.display = "inline-block";
+
+  // Exibe resultados
+  resultsDiv.style.display = "flex";
+  resultsDiv.style.flexWrap = "wrap";
+  resultsDiv.style.justifyContent = "center";
+  resultsDiv.style.gap = "15px";
+  resultsDiv.innerHTML = results.map(item => createSearchCard(item, tipo)).join("");
+});
+
+// 🧹 Limpa a busca e restaura os carrosséis
+document.getElementById("clearButton").addEventListener("click", () => {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("searchResults").style.display = "none";
+  document.getElementById("carrossel-principal").style.display = "block";
+  document.getElementById("clearButton").style.display = "none";
+});
+
+// 🔄 Pressionar Enter também faz a busca
+document.getElementById("searchInput").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("searchButton").click();
+  }
+});
 
 
 // Listener do seletor
