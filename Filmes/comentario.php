@@ -9,7 +9,7 @@ $usuario = $_SESSION["usuarios"];
 $texto = $_POST['texto'] ?? '';
 $nota = $_POST['nota'] ?? 1;
 $filme_id = $_POST['filme_id'] ?? 0;
-$spoiler = isset($_POST['spoiler']) ? true : false;
+$spoiler = isset($_POST['spoiler']) && $_POST['spoiler'] == "on" ? 1 : 0;
 
 if ($texto && $filme_id) {
     try {
@@ -17,7 +17,7 @@ if ($texto && $filme_id) {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $pdo->prepare("INSERT INTO comentarios (filme_id, usuario, texto, nota, spoiler) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$filme_id, $usuario, $texto, $nota]);
+        $stmt->execute([$filme_id, $usuario, $texto, $nota, $spoiler]);
 
         header("Location: filme.php?id=$filme_id");
         exit;
