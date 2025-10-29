@@ -5,7 +5,7 @@ if(!isset($_SESSION["usuarios"])) {
     exit;
 }
 
-$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "amogus");
+$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 
 $id = $_GET['id'] ?? null;
 if (!$id) {
@@ -33,11 +33,11 @@ $poster = $info["imageLinks"]["thumbnail"]
     ?? "https://via.placeholder.com/300x450?text=Sem+Imagem";
 
 // Comentários do usuário
-$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarios WHERE livro_id = ? ORDER BY data_hora ASC");
+$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarioslivro WHERE livro_id = ? ORDER BY data_hora ASC");
 $stmt2->execute([$id]);
 $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
-$mediaStmt = $conn->prepare("SELECT ROUND(AVG(nota), 1) AS media FROM comentarios WHERE livro_id = ?");
+$mediaStmt = $conn->prepare("SELECT ROUND(AVG(nota), 1) AS media FROM comentarioslivro WHERE livro_id = ?");
 $mediaStmt->execute([$id]);
 $media = $mediaStmt->fetchColumn();
 ?>
@@ -55,7 +55,7 @@ $media = $mediaStmt->fetchColumn();
     --cinza-escuro: #343A40;
     --azul-petroleo: #007B83;
     --coral: #FF6B6B;
-     --cinza: #1e1e2f;
+    --cinza: #1e1e2f;
     --cinza-claro: #2a2a40;
     --texto: #f5f5f5;
     --cinza-div: #343A40;
@@ -73,7 +73,6 @@ body {
     animation: gradientMove 120s ease infinite;
     color: var(--branco-gelo);
     height: 100vh;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -381,7 +380,7 @@ section p strong {
     <div id="comentarios">
         <h2>Comentários</h2>
 
-        <form action="comentario.php" method="post">
+        <form action="comentarioLivro.php" method="post">
             <input type="hidden" name="livro_id" value="<?= htmlspecialchars($id) ?>">
             <label>Avaliação (0 a 10):</label><br>
             <div class="notas">

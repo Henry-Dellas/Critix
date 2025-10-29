@@ -405,7 +405,8 @@ section p strong {
             </div>
             <input type="hidden" name="tipo" value="serie">
             <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
-            <input type="checkbox" id="spoiler" name="spoiler" value=true>
+            <input type="hidden" name="spoiler" value="0">
+            <input type="checkbox" id="spoiler" name="spoiler" value="1">
             <label for="spoiler"> Comentário com spoiler?</label><br><br>
             <button type="submit">Enviar comentário</button>
         </form>
