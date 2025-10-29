@@ -31,7 +31,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $stmt->execute([':nome'=>$nome, ':email'=>$email, ':senha'=>$senha]);
 
         $msg = urlencode("Cadastro realizado com sucesso!");
-        header("Location: LoginTeste.php?msg=$msg");
+        header("Location: Login Teste.php?msg=$msg");
         exit;
 
     } catch(Exception $e){
