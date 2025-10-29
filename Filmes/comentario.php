@@ -9,7 +9,7 @@ $usuario = $_SESSION["usuarios"];
 $texto = $_POST['texto'] ?? '';
 $nota = $_POST['nota'] ?? 1;
 $filme_id = $_POST['filme_id'] ?? 0;
-$tipo = $_POST['tipo'] ?? 'filme';
+$tipo = $_POST['tipo'] ?? "serie" ?? "filme";
 $spoiler = isset($_POST['spoiler']) && $_POST['spoiler'] == "on" ? 1 : 0;
 
 if ($texto && $filme_id) {

@@ -78,8 +78,11 @@ $media = $mediaStmt->fetchColumn();
     --estrela-cheia: #FFD700;
 }
 
-* { margin:0; padding:0; box-sizing:border-box; font-family: "Poppins", sans-serif; }
-html, body { width:100vw; min-height:100vh; overflow-x: hidden; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 body {
     font-family: "Poppins", Arial, Helvetica, sans-serif;
@@ -101,7 +104,31 @@ body {
     animation: gradientMove 120s ease infinite;
 }
 
-@keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#emoji-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+.emoji {
+    position: absolute;
+    font-size: 24px;
+    animation: float 10s linear infinite;
+    opacity: 0.5 + Math.random()*0.5;
+}
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); }
+    100% { transform: translateY(-10vh) rotate(360deg); }
+}
 
 #emoji-bg {
     position: fixed;
@@ -131,6 +158,10 @@ header {
     text-shadow: 0 0 25px rgba(255,107,107,0.7);
     margin-bottom: 30px;
     text-align: center;
+    color: var(--coral);
+    text-shadow: 0 0 20px rgba(255,107,107,0.7);
+    margin: 15px 0;
+    letter-spacing: 2px;
     z-index: 2;
 }
 
@@ -176,15 +207,48 @@ section p { margin-bottom: 8px; font-size: 15px; line-height: 1.5; }
 
 #form-comentario {
     width: 100%;
-    max-width: 450px;
-    background: rgba(255,255,255,0.07);
+    max-width: 250px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+#aside-esquerda p { margin-top: 12px; font-size: 16px; }
+
+section {
+    flex: 2 1 500px;
+    background-color: #343A40; 
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    text-align: justify;
+    overflow-y: auto;
+    max-height: 72vh;
+    scrollbar-width: thin;
+    scrollbar-color: var(--coral) transparent;
+}
+section::-webkit-scrollbar { width: 6px; }
+section::-webkit-scrollbar-thumb { background: var(--coral); border-radius: 10px; }
+
+section h1 {
+    font-size: 26px;
+    color: var(--coral);
+    margin-bottom: 12px;
+}
+section p {
+    font-size: 16.5px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+section p strong {
+    color: var(--coral);
+}
+
+#aside-direita {
+    flex: 1 1 240px;
+    background-color: #343A40; 
     padding: 25px;
     border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    text-align: center;
 }
 
 #form-comentario:hover { background: rgba(255,255,255,0.1); }
@@ -404,6 +468,7 @@ section p strong {
                 <label for="nota<?= $i ?>"><?= $i ?></label>
                 <?php endfor; ?>
             </div>
+            <input type="hidden" name="tipo" value="filme">
             <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
             <input type="hidden" name="spoiler" value="0">
             <input type="checkbox" id="spoiler" name="spoiler" value="1">
@@ -419,9 +484,6 @@ section p strong {
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
-            <textarea name="texto" placeholder="Escreva seu comentário..." required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
             <?php else: ?>
                 <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
             <?php endif; ?>
