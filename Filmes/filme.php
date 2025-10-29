@@ -456,39 +456,34 @@ section p strong {
     </aside>
 
     <!-- Seção de comentários -->
-    <div id="comentarios-e-avaliacao">
-        <div id="form-comentario">
-            <form action="comentario.php" method="post">
-                <input type="hidden" name="filme_id" value="<?= htmlspecialchars($id) ?>">
-                <div class="nota-container">
-                    <label class="nota-label">Avaliação:</label>
-                    <div class="estrelas">
-                        <?php for ($i = 1; $i <= 10; $i++): ?>
-                            <input type="radio" id="nota<?= $i ?>" name="nota" value="<?= $i ?>" required>
-                            <label for="nota<?= $i ?>">★</label>
-                        <?php endfor; ?>
-                    </div>
-                </div>
-            </div>
-            <<textarea name="texto" placeholder="Escreva seu comentário..." required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </div>
+    <div id="comentarios">
+        <h2>Comentários</h2>
 
-        <div id="comentarios">
-            <?php if ($comentarios): ?>
-                <?php foreach ($comentarios as $c): ?>
-                    <div class="comentario">
-                        <div class="comentario-header">
-                            <strong><?= htmlspecialchars($c['usuario']) ?></strong>
-                            <span>— <?= htmlspecialchars($c['nota']) ?>★ —</span>
-                            <span><?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?></span>
-                        </div>
-                        <div class="comentario-texto">
-                            <?= nl2br(htmlspecialchars($c['texto'])) ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+        <form action="comentario.php" method="post">
+            <input type="hidden" name="filme_id" value="<?= htmlspecialchars($id) ?>">
+            <label>Avaliação (0 a 10):</label><br>
+            <div class="notas">
+                <?php for ($i = 10; $i >= 0; $i--): ?>
+                <input type="radio" id="nota<?= $i ?>" name="nota" value="<?= $i ?>" required>
+                <label for="nota<?= $i ?>"><?= $i ?></label>
+                <?php endfor; ?>
+            </div>
+            <input type="hidden" name="tipo" value="filme">
+            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
+            <input type="hidden" name="spoiler" value="0">
+            <input type="checkbox" id="spoiler" name="spoiler" value="1">
+            <label for="spoiler"> Comentário com spoiler?</label><br><br>
+            <button type="submit">Enviar comentário</button>
+        </form>
+        <hr>
+        <?php if ($comentarios): ?>
+            <?php foreach ($comentarios as $c): ?>
+                <div class="comentario">
+                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — 
+                    <?= htmlspecialchars($c['nota']) ?> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
+                    <?= nl2br(htmlspecialchars($c['texto'])) ?>
+                </div>
+            <?php endforeach; ?>
             <?php else: ?>
                 <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
             <?php endif; ?>
@@ -511,6 +506,5 @@ for(let i=0; i<25; i++){
     emojiContainer.appendChild(span);
 }
 </script>
-
 </body>
 </html>

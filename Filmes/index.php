@@ -268,8 +268,6 @@ async function fetchMedia(tipo = "movie", generoId = null, page = 1) {
   return filtered;
 }
 
-
-
 async function fetchMedia(tipo="movie", generoId=null, page=1){
     let url = `https://api.themoviedb.org/3/discover/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&sort_by=popularity.desc&page=${page}`;
     if (generoId) url += `&with_genres=${generoId}`;
@@ -277,7 +275,6 @@ async function fetchMedia(tipo="movie", generoId=null, page=1){
     const data = await res.json();
     return data.results;
 }
-
 
 function createMediaSlide(item, tipo) {
     const imageUrl = item.poster_path
