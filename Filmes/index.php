@@ -243,14 +243,25 @@ const generos = {
     ]
 };
 
-// Busca livros pelo gênero
-async function fetchBooks(category) {
+// Busca livros pelo termo digitado (ou gênero, dependendo do uso)
+async function fetchBooks(query) {
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${category}&maxResults=10&langRestrict=pt`);
+        const encodedQuery = encodeURIComponent(query);
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&maxResults=10&printType=books`;
+
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erro ao acessar API Google Books");
+
         const data = await response.json();
-        return data.items || [];
+
+        if (!data.items || data.items.length === 0) {
+            console.warn("Nenhum livro encontrado para:", query);
+            return [];
+        }
+
+        return data.items;
     } catch (error) {
-        console.error("Erro ao buscar livros:", error);
+        console.error("Erro em fetchBooks:", error);
         return [];
     }
 }
@@ -392,7 +403,7 @@ async function initCarrossels(tipo = "movie") {
 async function searchMedia(query, tipo="movie") {
   if (!query.trim()) return [];
 
-  if (tipo === "book") {
+  if (tipo === "livro") {
     const apiKeyGoogle = "";
     const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20&langRestrict=pt`;
     const res = await fetch(url);
@@ -406,15 +417,18 @@ async function searchMedia(query, tipo="movie") {
   }
 }
 
-// 🧩 Cria cartões de resultados de pesquisa
 function createSearchCard(item, tipo) {
-    if (tipo === "book") {
+  if (tipo === "livro") {
     const info = item.volumeInfo || {};
-    const imageUrl = info.imageLinks?.thumbnail || "https://via.placeholder.com/300x450?text=Sem+Imagem";
-    const title = info.title || "Título indisponível";
-    const authors = info.authors ? info.authors.join(", ") : "Autor desconhecido";
-    const description = info.description ? info.description.substring(0, 100) + "..." : "Sem descrição.";
-    const previewLink = info.previewLink || "#";
+    const title = info.title && info.title.trim() !== "" ? info.title : "Título não disponível";
+    const authors = Array.isArray(info.authors) ? info.authors.join(", ") : "Autor desconhecido";
+    const description = info.description ? info.description.substring(0, 120) + "..." : "Sem descrição disponível.";
+    const imageUrl = info.imageLinks?.thumbnail
+      ? info.imageLinks.thumbnail.replace("http:", "https:")
+      : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+
+    // Usa o ID do livro para abrir a página interna
+    const bookId = item.id || "";
 
     return `
       <div style="
@@ -428,7 +442,7 @@ function createSearchCard(item, tipo) {
         box-shadow:0 6px 20px rgba(0,0,0,0.4);
         transition:transform 0.3s;
       " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
-        <a href="${previewLink}" target="_blank" style="text-decoration:none; color:white;">
+        <a href="livros.php?id=${bookId}" style="text-decoration:none; color:white;">
           <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
           <div style="margin-top:8px;">
             <strong>${title}</strong><br>
@@ -439,37 +453,37 @@ function createSearchCard(item, tipo) {
       </div>
     `;
   } else {  
-  const imageUrl = item.poster_path
-    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
-  const title = item.title || item.name || "Título indisponível";
-  const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
-  const id = item.id;
+    // Filmes / Séries (inalterado)
+    const imageUrl = item.poster_path
+      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+      : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+    const title = item.title || item.name || "Título indisponível";
+    const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
+    const id = item.id;
 
-  const link = tipo === "movie" ? `filme.php?id=${id}` : `serie.php?id=${id}`;
-  
+    const link = tipo === "movie" ? `filme.php?id=${id}` : `serie.php?id=${id}`;
 
-  return `
-    <div style="
-      background:#2e2e38;
-      border-radius:15px;
-      padding:10px;
-      margin:10px;
-      text-align:center;
-      color:white;
-      width:180px;
-      box-shadow:0 6px 20px rgba(0,0,0,0.4);
-      transition:transform 0.3s;
-    " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
-      <a href="${link}" style="text-decoration:none; color:white;">
-        <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
-        <div style="margin-top:8px;">
-          <strong>${title}</strong><br>
-          ⭐ ${nota} / 10
-        </div>
-      </a>
-    </div>
-  `;
+    return `
+      <div style="
+        background:#2e2e38;
+        border-radius:15px;
+        padding:10px;
+        margin:10px;
+        text-align:center;
+        color:white;
+        width:180px;
+        box-shadow:0 6px 20px rgba(0,0,0,0.4);
+        transition:transform 0.3s;
+      " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+        <a href="${link}" style="text-decoration:none; color:white;">
+          <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
+          <div style="margin-top:8px;">
+            <strong>${title}</strong><br>
+            ⭐ ${nota} / 10
+          </div>
+        </a>
+      </div>
+    `;
   }
 }
 

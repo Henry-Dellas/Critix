@@ -5,6 +5,37 @@ if(!isset($_SESSION["usuarios"])) {
     exit;
 }
 
+function traduzirTexto($texto) {
+    if (empty($texto)) return "Sem descrição disponível.";
+
+    $texto = strip_tags($texto); // remove HTML, se houver
+    $partes = str_split($texto, 480); // divide o texto em blocos de 480 caracteres
+    $traducaoFinal = "";
+
+    foreach ($partes as $parte) {
+        $parteCodificada = urlencode($parte);
+        $url = "https://api.mymemory.translated.net/get?q={$parteCodificada}&langpair=en|pt";
+
+        $response = @file_get_contents($url);
+
+        if ($response !== FALSE) {
+            $result = json_decode($response, true);
+            if (isset($result['responseData']['translatedText'])) {
+                $traducaoFinal .= $result['responseData']['translatedText'] . " ";
+            } else {
+                $traducaoFinal .= $parte . " "; // fallback
+            }
+        } else {
+            $traducaoFinal .= $parte . " "; // fallback se falhar a requisição
+        }
+
+        // Evita limite de requisições (API gratuita)
+        usleep(300000); // 0.3 segundos entre cada requisição
+    }
+
+    return trim($traducaoFinal);
+}
+
 $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
 
 $id = $_GET['id'] ?? null;
@@ -21,11 +52,15 @@ if (!$livroData || isset($livroData["error"])) {
 }
 
 $info = $livroData["volumeInfo"] ?? [];
+$webReaderLink = $livroData["accessInfo"]["webReaderLink"] 
+                 ?? $info["volumeInfo"]["previewLink"] 
+                 ?? "";
 
 // 📚 Informações principais
 $titulo = $info["title"] ?? "Título indisponível";
 $autores = isset($info["authors"]) ? implode(", ", $info["authors"]) : "Autor não informado";
-$descricao = $info["description"] ?? "Sem descrição disponível";
+$descricaoOriginal = $info["description"] ?? "Sem descrição disponível";
+$descricaoTraduzida = traduzirTexto($descricaoOriginal);
 $nota = isset($info["averageRating"]) ? number_format($info["averageRating"], 1) : "-";
 $lancamento = $info["publishedDate"] ?? "Desconhecida";
 $categorias = isset($info["categories"]) ? implode(", ", $info["categories"]) : "Sem categorias";
@@ -360,13 +395,36 @@ section p strong {
         <p><strong>Publicado:</strong> <?= htmlspecialchars($lancamento) ?></p>
     </aside>
 
-    <section>
-        <h1><?= htmlspecialchars($titulo) ?></h1>
-        <p><strong>Autores:</strong> <?= htmlspecialchars($autores) ?></p>
-        <p><strong>Média dos usuários:</strong> <?= $media ? $media : "Sem avaliações ainda" ?></p>
-        <p><strong>Nota Google Books:</strong> <?= $nota ?></p>
-        <p><strong>Categorias:</strong> <?= htmlspecialchars($categorias) ?></p>
-        <p><?= nl2br(htmlspecialchars($descricao)) ?></p>
+    <section style="color:white; padding:20px;">
+    <h1><?= htmlspecialchars($titulo) ?></h1>
+    <p><strong>Autores:</strong> <?= htmlspecialchars($autores) ?></p>
+    <p><strong>Média dos usuários:</strong> <?= $media ? $media : "Sem avaliações ainda" ?></p>
+    <p><strong>Nota Google Books:</strong> <?= $nota ?></p>
+    <p><strong>Categorias:</strong> <?= htmlspecialchars($categorias) ?></p>
+    <p><?= nl2br(htmlspecialchars($descricaoTraduzida)) ?></p>
+
+    <?php if (!empty($webReaderLink)): ?>
+        <div style="margin-top:25px; text-align:center;">
+            <a href="<?= htmlspecialchars($webReaderLink) ?>" 
+               target="_blank"
+               style="
+                    display:inline-block;
+                    background:#2e2e38;
+                    color:white;
+                    font-weight:bold;
+                    border:none;
+                    padding:12px 25px;
+                    border-radius:15px;
+                    text-decoration:none;
+                    box-shadow:0 6px 20px rgba(0,0,0,0.4);
+                    transition:all 0.3s ease;
+               "
+               onmouseover="this.style.transform='scale(1.07)'; this.style.background='#3e3e4a';"
+               onmouseout="this.style.transform='scale(1)'; this.style.background='#2e2e38';">
+               Ver no Google Books
+            </a>
+        </div>
+    <?php endif; ?>
     </section>
 
     <aside id="aside-direita">
