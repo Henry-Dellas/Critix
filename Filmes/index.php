@@ -235,14 +235,22 @@ const generos = {
     ]
 };
 
+// Busca livros pelo termo digitado (ou gênero, dependendo do uso)
 async function fetchBooks(query) {
     try {
         const encodedQuery = encodeURIComponent(query);
         const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&maxResults=10&printType=books`;
+
         const response = await fetch(url);
         if (!response.ok) throw new Error("Erro ao acessar API Google Books");
+
         const data = await response.json();
-        if (!data.items || data.items.length === 0) return [];
+
+        if (!data.items || data.items.length === 0) {
+            console.warn("Nenhum livro encontrado para:", query);
+            return [];
+        }
+
         return data.items;
     } catch (error) {
         console.error("Erro em fetchBooks:", error);
