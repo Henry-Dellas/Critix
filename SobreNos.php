@@ -17,7 +17,6 @@
     --texto-secundario: #a8e6cf;
 }
 
-/* Reset e fontes */
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', Arial, Helvetica, sans-serif; }
 body { 
     background: linear-gradient(135deg, #1e1e2f, #007B83); 
@@ -28,14 +27,12 @@ body {
     overflow-x: hidden;
 }
 
-/* Animação do background */
 @keyframes gradientMove { 
     0% { background-position: 0% 50%; } 
     50% { background-position: 100% 50%; } 
     100% { background-position: 0% 50%; } 
 }
 
-/* Botão de Voltar estilo seta */
 #botao-voltar {
     position: fixed;
     top: 20px;
@@ -53,10 +50,8 @@ body {
     transform: rotate(45deg) scale(1.2);
 }
 
-/* Container */
 .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
-/* Títulos de seções */
 .section-title h2 {
     font-family: "Cinzel", serif;
     font-size: 3rem;
@@ -66,14 +61,12 @@ body {
     margin-bottom: 2rem;
 }
 
-/* About - Nossa História */
 .about-content { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 2rem; margin-bottom: 40px; }
 .about-text { flex: 1; min-width: 300px; line-height: 1.6; text-align: justify; color: var(--texto-claro); }
 .about-image { flex: 1; min-width: 300px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
 .about-image img { width: 100%; height: auto; display: block; transition: transform 0.5s ease; }
 .about-image img:hover { transform: scale(1.05); }
 
-/* Mission & Vision */
 .mission-vision { background-color: var(--fundo-escuro); padding: 50px 0; }
 .mv-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; }
 .mv-card { background: var(--fundo-claro); padding: 2rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.5); flex: 1; min-width: 300px; max-width: 500px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; color: var(--texto-claro); }
@@ -81,7 +74,6 @@ body {
 .mv-card i { font-size: 2.5rem; color: var(--cor-destaque); margin-bottom: 1rem; }
 .mv-card h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--cor-destaque); }
 
-/* Values */
 .values { padding: 50px 0; }
 .values-grid { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }
 .value-card { background: var(--fundo-claro); padding: 2rem; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.5); flex: 1; min-width: 250px; max-width: 300px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; color: var(--texto-claro); }
@@ -89,7 +81,6 @@ body {
 .value-card i { font-size: 2rem; color: var(--cor-destaque); margin-bottom: 1rem; }
 .value-card h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--cor-destaque); }
 
-/* Team */
 .team { 
     background-color: var(--fundo-escuro); 
     padding: 50px 0; 
@@ -101,39 +92,23 @@ body {
 }
 .team img:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(255,107,107,0.6); }
 
-/* Footer */
 footer { background-color: var(--fundo-escuro); color: var(--texto-claro); padding: 3rem 0; text-align: center; }
 .footer-links a:hover { color: var(--cor-destaque); }
 .social-icons a { display:flex; align-items:center; justify-content:center; width:40px; height:40px; background-color: var(--cor-destaque); color: var(--fundo-escuro); border-radius:50%; text-decoration:none; transition: transform 0.3s, background-color 0.3s; }
 .social-icons a:hover { transform: translateY(-3px); background-color: var(--texto-secundario) !important; }
 
-/* Responsividade */
 @media (max-width: 768px) { 
     .values-grid { flex-direction: column; gap: 1.5rem; }
     .mv-container { flex-direction: column; gap: 1.5rem; }
     .team img { width: 90%; }
 }
 
-/* Emoji Background Suave e Infinito */
-#emoji-bg { 
-    position: fixed; 
-    top: 0; left: 0; 
-    width: 100%; height: 100%; 
-    pointer-events: none; 
-    z-index: -1; 
-}
-.emoji { 
-    position: absolute; 
-    will-change: transform;
-    font-size: 18px;
-    opacity: 0.3;
-    user-select: none;
-}
+#emoji-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+.emoji { position: absolute; will-change: transform; font-size: 18px; opacity: 0.3; user-select: none; }
 </style>
 </head>
 <body>
 
-<!-- Botão de voltar ajustado -->
 <a href="Filmes/index.php" id="botao-voltar"></a>
 
 <div id="emoji-bg"></div>
@@ -200,6 +175,12 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
         <div class="section-title"><h2>Nosso Time</h2></div>
         <img src="748826c0-4877-4b55-a3d6-7f886cff61a8.jpg" alt="Equipe DataMind">
     </div>
+   <div style="margin-top:15px; font-size:0.85rem; line-height:1.4; text-align:center; color:var(--texto-secundario);">
+    <strong style="font-size:1rem;">Breno Souza</strong> – responsável pelo design e efeitos do site (CSS e JavaScript).<br>
+    📧 <a href="mailto:brenosss2008@gmail.com" style="color:var(--cor-destaque); text-decoration:none;">brenosss2008@gmail.com</a> | 
+    🌐 <a href="https://github.com/BrenoSouzaDev" target="_blank" style="color:var(--cor-destaque); text-decoration:none;">github.com/BrenoSouzaDev</a>
+</div>
+
 </section>
 
 <footer>
@@ -207,7 +188,7 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
     <div class="footer-content" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:2rem;">
       <div class="footer-section" style="flex:1; min-width:250px; text-align:left;">
         <h3 style="color: var(--cor-destaque); font-size: 1.5rem; margin-bottom:10px;">DataMind</h3>
-        <p style="color: var(--texto-secundario); line-height: 1.6; margin-left:0;">Sua plataforma de reviews comunitários de filmes, séries e livros.</p>
+        <p style="color: var(--texto-secundario); line-height: 1.6;">Sua plataforma de reviews comunitários de filmes, séries e livros.</p>
         <div class="social-icons" style="margin-top:15px; display:flex; gap:10px;">
           <a href="#"><i class="fab fa-facebook-f"></i></a>
           <a href="#"><i class="fab fa-twitter"></i></a>
@@ -217,7 +198,7 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
       </div>
       <div class="footer-section" style="flex:1; min-width:250px; text-align:right;">
         <h3 style="color: var(--cor-destaque); font-size: 1.5rem; margin-bottom:10px;">Contato</h3>
-        <ul style="list-style:none; color: var(--texto-secundario); line-height:1.8; padding:0;">
+        <ul style="list-style:none; color: var(--texto-secundario); line-height:1.8;">
           <li><i class="fas fa-envelope"></i> contato@datamind.com</li>
           <li><i class="fas fa-phone"></i> (11) 9999-9999</li>
           <li><i class="fas fa-map-marker-alt"></i> São Paulo, Brasil</li>
@@ -225,11 +206,13 @@ footer { background-color: var(--fundo-escuro); color: var(--texto-claro); paddi
       </div>
     </div>
 
-    <!-- Linha de copyright + TMDB -->
-    <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center; color:var(--texto-secundario); font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
-      <img src="WhatsApp_Image_2025-10-27_at_20.08.58-convertido-de-jpeg-removebg-preview.png" alt="TMDB" style="height:1em;">
-      <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
-      <span>&copy; 2023 DataMind - Todos os direitos reservados</span>
+    <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px; text-align:center; color:var(--texto-secundario); font-size:0.9rem; display:flex; flex-direction:column; align-items:center; gap:10px;">
+
+      <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;">
+        <img src="WhatsApp_Image_2025-10-27_at_20.08.58-convertido-de-jpeg-removebg-preview.png" alt="TMDB" style="height:1em;">
+        <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
+        <span>&copy; 2023 DataMind - Todos os direitos reservados</span>
+      </div>
     </div>
   </div>
 </footer>
@@ -245,32 +228,22 @@ function createEmoji() {
     span.style.left = Math.random()*100 + 'vw';
     span.style.fontSize = 14 + Math.random()*16 + 'px';
     span.style.opacity = 0.2 + Math.random()*0.4;
-
     emojiContainer.appendChild(span);
-
     let posY = window.innerHeight + Math.random()*200;
     const speed = 0.3 + Math.random()*0.5;
     const rotation = 0.1 + Math.random()*0.2;
     let rot = 0;
-
     function animate() {
         posY -= speed;
         rot += rotation;
         span.style.top = posY + 'px';
         span.style.transform = `rotate(${rot}deg)`;
-        if(posY < -50){
-            posY = window.innerHeight + 50;
-            span.style.left = Math.random()*100 + 'vw';
-        }
+        if(posY < -50){ posY = window.innerHeight + 50; span.style.left = Math.random()*100 + 'vw'; }
         requestAnimationFrame(animate);
     }
     animate();
 }
-
-// Cria 20 emojis flutuando suavemente
-for(let i=0;i<20;i++){
-    createEmoji();
-}
+for(let i=0;i<20;i++){ createEmoji(); }
 </script>
 
 </body>

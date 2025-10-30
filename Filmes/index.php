@@ -2,6 +2,7 @@
 session_start(); 
 if (!isset($_SESSION["usuarios"])) { 
     header("location:Login Teste.php"); 
+    exit;
 } 
 ?>
 <!DOCTYPE html>
@@ -91,7 +92,6 @@ header {
     box-shadow: 0 0 30px var(--coral);
 }
 
-/* === Containers de carrossel === */
 #tipo-container {
     margin-bottom: 20px;
     text-align: center;
@@ -147,7 +147,6 @@ header {
     #bemvindo { font-size: 1.5em; text-align: center; } 
 }
 
-
 </style>
 </head>
 <body>
@@ -159,49 +158,43 @@ header {
 <div id="area-texto">
     <h1 id="bemvindo">Bem-vindo, <?php echo htmlspecialchars($_SESSION["usuarios"]); ?>.</h1>
     <div>
-        <!-- 🔗 Caminho corrigido -->
         <a href="../SobreNos.php" id="button-indicacoes">Sobre Nós</a>
         <a href="../IA/testeIA.html" id="button-indicacoes">Ir para Indicações</a>
         <a href="../Cadastro_Login/logout.php" id="button">Sair da conta</a>
     </div>
 </div>
 
-<!-- Seletor Filmes/Séries -->
-<div id="tipo-container">
-    <label for="tipo">Selecione tipo:</label>
+<div id="search-bar-container" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:15px; margin-bottom:25px; max-width:900px; margin-left:auto; margin-right:auto;">
+    <label for="tipo" style="color:white; font-weight:600;">Selecione tipo:</label>
     <select id="tipo" style="padding:10px 15px; border-radius:8px; font-size:16px;">
         <option value="movie" selected>Filmes</option>
         <option value="tv">Séries</option>
         <option value="livro">Livros</option> 
     </select>
+
+    <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Buscar filmes ou séries..." 
+        style="padding:10px 15px; border-radius:8px; font-size:16px; min-width:250px; flex:1;"
+    >
+
+    <button id="searchButton" style="padding:10px 20px; border-radius:8px; background:#FF6B6B; color:white; border:none; cursor:pointer;">
+        Pesquisar
+    </button>
+
+    <button id="clearButton" style="padding:10px 20px; border-radius:8px; background:#007B83; color:white; border:none; cursor:pointer; display:none;">
+        Limpar busca
+    </button>
 </div>
 
-<!-- 🔍 Barra de Pesquisa -->
-<div id="search-container" style="text-align:center; margin-bottom:25px;">
-  <input 
-    type="text" 
-    id="searchInput" 
-    placeholder="Buscar filmes ou séries..." 
-    style="padding:10px 15px; border-radius:8px; font-size:16px; width:50%; max-width:400px;"
-  >
-  <button id="searchButton" style="padding:10px 20px; border-radius:8px; background:#FF6B6B; color:white; border:none; cursor:pointer;">
-    Pesquisar
-  </button>
-  <button id="clearButton" style="padding:10px 20px; border-radius:8px; background:#007B83; color:white; border:none; cursor:pointer; display:none;">
-    Limpar busca
-  </button>
-</div>
-
-<!-- 🔎 Resultados da Pesquisa -->
 <div id="searchResults" style="display:none;"></div>
 
-
-
-<!-- Carrosséis por gênero -->
 <div id="carrossel-principal"></div>
 
 <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
 <script>
+
 const emojis = ['🎬','🍿','📚','🎥','😄','🤩','⭐','🎶','📖','🎭','😎','🥳','🍿','🎉'];
 const emojiContainer = document.getElementById('emoji-bg');
 for(let i=0; i<25; i++){
@@ -215,7 +208,6 @@ for(let i=0; i<25; i++){
     emojiContainer.appendChild(span);
 }
 
-// API TMDb
 const TMDB_API_KEY = "7a4a474069f49e3f759f137ccfa33365";
 const TMDB_LANGUAGE = "pt-BR";
 
@@ -243,48 +235,19 @@ const generos = {
     ]
 };
 
-// Busca livros pelo gênero
-async function fetchBooks(category) {
+async function fetchBooks(query) {
     try {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=subject:${category}&maxResults=10&langRestrict=pt`);
+        const encodedQuery = encodeURIComponent(query);
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedQuery}&maxResults=10&printType=books`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Erro ao acessar API Google Books");
         const data = await response.json();
-        return data.items || [];
+        if (!data.items || data.items.length === 0) return [];
+        return data.items;
     } catch (error) {
-        console.error("Erro ao buscar livros:", error);
+        console.error("Erro em fetchBooks:", error);
         return [];
     }
-}
-
-async function fetchMedia(tipo = "movie", generoId = null, page = 1) {
-  const url = `https://api.themoviedb.org/3/discover/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&sort_by=popularity.desc&page=${page}&include_adult=false${generoId ? "&with_genres=" + generoId : ""}`;
-
-  const res = await fetch(url);
-  const data = await res.json();
-  const results = data.results || [];
-
-  const adultKeywords = [
-    "porn", "xxx", "erotic", "adult", "sex", "18+", "nude", "explicit", "hot", "sensual",
-    "ligaw", "bold", "temptation", "affair", "lust", "seduction" // adiciona aqui as palavras que quiser
-  ];
-
-  // função para detectar conteúdo adulto
-  function isAdultContent(item) {
-    if (item.adult === true) return true;
-
-    const textToCheck = `
-      ${item.title || ""} 
-      ${item.original_title || ""} 
-      ${item.name || ""} 
-      ${item.original_name || ""} 
-      ${item.overview || ""}
-    `.toLowerCase();
-
-    return adultKeywords.some(word => textToCheck.includes(word));
-  }
-
-  const filtered = results.filter(item => !isAdultContent(item));
-
-  return filtered;
 }
 
 async function fetchMedia(tipo="movie", generoId=null, page=1){
@@ -296,13 +259,10 @@ async function fetchMedia(tipo="movie", generoId=null, page=1){
 }
 
 function createMediaSlide(item, tipo) {
-    const imageUrl = item.poster_path
-        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-        : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+    const imageUrl = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://via.placeholder.com/300x450?text=Sem+Imagem";
     const title = item.title || item.name || "Título indisponível";
     const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
     const link = tipo === "movie" ? `filme.php?id=${item.id}` : `serie.php?id=${item.id}`;
-
     return `
         <div class="swiper-slide">
             <a href="${link}" class="slide-link">
@@ -316,14 +276,11 @@ function createMediaSlide(item, tipo) {
     `;
 }
 
-// Atualiza a função initCarrossels para suportar livros
 async function initCarrossels(tipo = "movie") {
     const container = document.getElementById("carrossel-principal");
-    container.innerHTML = ""; // limpa antes de inserir
-    container.style.display = "block"; // garante que container seja exibido
-
+    container.innerHTML = "";
+    container.style.display = "block";
     for (const genero of generos[tipo]) {
-        // Cria container do gênero
         const generoContainer = document.createElement("div");
         generoContainer.classList.add("carrossel-gen");
         generoContainer.innerHTML = `
@@ -340,18 +297,12 @@ async function initCarrossels(tipo = "movie") {
         let slidesHtml = "";
 
         if (tipo === "livro") {
-            // Busca livros pelo gênero
             const livros = await fetchBooks(genero.id);
             slidesHtml = livros.map(book => {
                 const info = book.volumeInfo || {};
                 const title = info.title || "Título indisponível";
-                const imageUrl = info.imageLinks?.thumbnail 
-                    ? info.imageLinks.thumbnail.replace("http:", "https:") 
-                    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
-                const description = info.description 
-                    ? info.description.substring(0, 100) + "..." 
-                    : "Sem descrição disponível";
-
+                const imageUrl = info.imageLinks?.thumbnail ? info.imageLinks.thumbnail.replace("http:", "https:") : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+                const description = info.description ? info.description.substring(0,100)+"..." : "Sem descrição disponível";
                 return `
                     <div class="swiper-slide">
                         <a href="livros.php?id=${book.id}" class="slide-link">
@@ -365,170 +316,100 @@ async function initCarrossels(tipo = "movie") {
                 `;
             }).join("");
         } else {
-            // Filmes ou séries
             const mediaList = await fetchMedia(tipo, genero.id);
             slidesHtml = mediaList.map(item => createMediaSlide(item, tipo)).join("");
         }
 
         wrapper.innerHTML = slidesHtml;
 
-        // Inicializa Swiper
         new Swiper(`#carrossel-container .mySwiper`, {
             slidesPerView: 5,
             spaceBetween: 15,
             loop: true,
             autoplay: { delay: 2500, disableOnInteraction: false },
-            breakpoints: {
-                0: { slidesPerView: 1 },
-                600: { slidesPerView: 2 },
-                900: { slidesPerView: 4 },
-                1200: { slidesPerView: 5 }
-            }
+            breakpoints: { 0:{slidesPerView:1}, 600:{slidesPerView:2}, 900:{slidesPerView:4}, 1200:{slidesPerView:5} }
         });
     }
 }
 
-// 🔎 Função para buscar filmes/séries na TMDb
 async function searchMedia(query, tipo="movie") {
-  if (!query.trim()) return [];
-
-  if (tipo === "book") {
-    const apiKeyGoogle = "";
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20&langRestrict=pt`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.items || [];
-  } else {
-  const url = `https://api.themoviedb.org/3/search/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&query=${encodeURIComponent(query)}&include_adult=false`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.results || [];
-  }
+    if (!query.trim()) return [];
+    if (tipo === "livro") {
+        const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=20&langRestrict=pt`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.items || [];
+    } else {
+        const url = `https://api.themoviedb.org/3/search/${tipo}?api_key=${TMDB_API_KEY}&language=${TMDB_LANGUAGE}&query=${encodeURIComponent(query)}&include_adult=false`;
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.results || [];
+    }
 }
 
-// 🧩 Cria cartões de resultados de pesquisa
 function createSearchCard(item, tipo) {
-    if (tipo === "book") {
-    const info = item.volumeInfo || {};
-    const imageUrl = info.imageLinks?.thumbnail || "https://via.placeholder.com/300x450?text=Sem+Imagem";
-    const title = info.title || "Título indisponível";
-    const authors = info.authors ? info.authors.join(", ") : "Autor desconhecido";
-    const description = info.description ? info.description.substring(0, 100) + "..." : "Sem descrição.";
-    const previewLink = info.previewLink || "#";
-
-    return `
-      <div style="
-        background:#2e2e38;
-        border-radius:15px;
-        padding:10px;
-        margin:10px;
-        text-align:center;
-        color:white;
-        width:180px;
-        box-shadow:0 6px 20px rgba(0,0,0,0.4);
-        transition:transform 0.3s;
-      " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
-        <a href="${previewLink}" target="_blank" style="text-decoration:none; color:white;">
-          <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
-          <div style="margin-top:8px;">
-            <strong>${title}</strong><br>
-            <small>${authors}</small><br>
-            <p style="font-size:12px; margin-top:5px; opacity:0.8;">${description}</p>
-          </div>
-        </a>
-      </div>
-    `;
-  } else {  
-  const imageUrl = item.poster_path
-    ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-    : "https://via.placeholder.com/300x450?text=Sem+Imagem";
-  const title = item.title || item.name || "Título indisponível";
-  const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
-  const id = item.id;
-
-  const link = tipo === "movie" ? `filme.php?id=${id}` : `serie.php?id=${id}`;
-  
-
-  return `
-    <div style="
-      background:#2e2e38;
-      border-radius:15px;
-      padding:10px;
-      margin:10px;
-      text-align:center;
-      color:white;
-      width:180px;
-      box-shadow:0 6px 20px rgba(0,0,0,0.4);
-      transition:transform 0.3s;
-    " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
-      <a href="${link}" style="text-decoration:none; color:white;">
-        <img src="${imageUrl}" alt="${title}" style="width:100%; border-radius:10px;">
-        <div style="margin-top:8px;">
-          <strong>${title}</strong><br>
-          ⭐ ${nota} / 10
+    if (tipo==="livro") {
+        const info = item.volumeInfo || {};
+        const title = info.title||"Título não disponível";
+        const authors = Array.isArray(info.authors)? info.authors.join(", "):"Autor desconhecido";
+        const description = info.description ? info.description.substring(0,120)+"...":"Sem descrição disponível.";
+        const imageUrl = info.imageLinks?.thumbnail ? info.imageLinks.thumbnail.replace("http:","https:") : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+        const bookId = item.id || "";
+        return `
+        <div style="background:#2e2e38;border-radius:15px;padding:10px;margin:10px;text-align:center;color:white;width:180px;box-shadow:0 6px 20px rgba(0,0,0,0.4);transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+            <a href="livros.php?id=${bookId}" style="text-decoration:none;color:white;">
+                <img src="${imageUrl}" alt="${title}" style="width:100%;border-radius:10px;">
+                <div style="margin-top:8px;"><strong>${title}</strong><br><small>${authors}</small><p style="font-size:12px;margin-top:5px;opacity:0.8;">${description}</p></div>
+            </a>
         </div>
-      </a>
-    </div>
-  `;
-  }
+        `;
+    } else {
+        const imageUrl = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "https://via.placeholder.com/300x450?text=Sem+Imagem";
+        const title = item.title || item.name || "Título indisponível";
+        const nota = item.vote_average ? item.vote_average.toFixed(1) : "-";
+        const id = item.id;
+        const link = tipo === "movie" ? `filme.php?id=${id}` : `serie.php?id=${id}`;
+        return `
+        <div style="background:#2e2e38;border-radius:15px;padding:10px;margin:10px;text-align:center;color:white;width:180px;box-shadow:0 6px 20px rgba(0,0,0,0.4);transition:transform 0.3s;" onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+            <a href="${link}" style="text-decoration:none;color:white;">
+                <img src="${imageUrl}" alt="${title}" style="width:100%;border-radius:10px;">
+                <div style="margin-top:8px;"><strong>${title}</strong><br>⭐ ${nota} / 10</div>
+            </a>
+        </div>
+        `;
+    }
 }
 
-// 🔍 Evento do botão de pesquisa
-document.getElementById("searchButton").addEventListener("click", async () => {
-  const query = document.getElementById("searchInput").value;
-  const tipo = document.getElementById("tipo").value;
-  const resultsDiv = document.getElementById("searchResults");
-  const carrosselDiv = document.getElementById("carrossel-principal");
-  const clearButton = document.getElementById("clearButton");
-
-  resultsDiv.style.display = "block";
-  resultsDiv.innerHTML = "<p style='color:white; text-align:center;'>🔎 Buscando...</p>";
-
-  const results = await searchMedia(query, tipo);
-
-  if (results.length === 0) {
-    resultsDiv.innerHTML = "<p style='color:white; text-align:center;'>Nenhum resultado encontrado 😢</p>";
-    return;
-  }
-
-  // Oculta os carrosséis
-  carrosselDiv.style.display = "none";
-  clearButton.style.display = "inline-block";
-
-  // Exibe resultados
-  resultsDiv.style.display = "flex";
-  resultsDiv.style.flexWrap = "wrap";
-  resultsDiv.style.justifyContent = "center";
-  resultsDiv.style.gap = "15px";
-  resultsDiv.innerHTML = results.map(item => createSearchCard(item, tipo)).join("");
+document.getElementById("searchButton").addEventListener("click", async ()=>{
+    const query = document.getElementById("searchInput").value;
+    const tipo = document.getElementById("tipo").value;
+    const resultsContainer = document.getElementById("searchResults");
+    const carrosselContainer = document.getElementById("carrossel-principal");
+    carrosselContainer.style.display = "none";
+    resultsContainer.style.display = "flex";
+    resultsContainer.style.flexWrap = "wrap";
+    resultsContainer.style.justifyContent = "center";
+    resultsContainer.innerHTML = "<p style='color:white;'>Buscando...</p>";
+    const results = await searchMedia(query,tipo);
+    if(!results.length){ resultsContainer.innerHTML="<p style='color:white;'>Nenhum resultado encontrado.</p>"; return; }
+    resultsContainer.innerHTML = results.map(item => createSearchCard(item,tipo)).join("");
+    document.getElementById("clearButton").style.display="inline-block";
 });
 
-// 🧹 Limpa a busca e restaura os carrosséis
-document.getElementById("clearButton").addEventListener("click", () => {
-  document.getElementById("searchInput").value = "";
-  document.getElementById("searchResults").style.display = "none";
-  document.getElementById("carrossel-principal").style.display = "block";
-  document.getElementById("clearButton").style.display = "none";
+document.getElementById("clearButton").addEventListener("click", ()=>{
+    document.getElementById("searchInput").value="";
+    document.getElementById("searchResults").style.display="none";
+    document.getElementById("carrossel-principal").style.display="block";
+    document.getElementById("clearButton").style.display="none";
 });
 
-// 🔄 Pressionar Enter também faz a busca
-document.getElementById("searchInput").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    document.getElementById("searchButton").click();
-  }
-});
-
-
-// Listener do seletor
-document.getElementById("tipo").addEventListener("change", (e)=>{
-    initCarrossels(e.target.value);
-});
-
-// Inicializa
-document.addEventListener("DOMContentLoaded", ()=>{
+document.getElementById("tipo").addEventListener("change", ()=>{
     initCarrossels(document.getElementById("tipo").value);
 });
+
+initCarrossels();
+
 </script>
+
 </body>
 </html>

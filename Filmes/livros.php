@@ -1,39 +1,43 @@
 <?php
 session_start();
-if(!isset($_SESSION["usuarios"])) {
-    header("location:Login Teste.php");
+if (!isset($_SESSION["usuarios"])) {
+    header("Location: Login Teste.php");
     exit;
 }
 
-$conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+$usuario = $_SESSION["usuarios"];
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
-    die("ID do livro não informado.");
+try {
+    $conn = new PDO("pgsql:host=localhost;dbname=bancox", "postgres", "System@2025");
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (Exception $e) {
+    die("Erro na conexão: " . htmlspecialchars($e->getMessage()));
 }
 
-// 🔍 Busca informações do livro na API Google Books
-$baseUrl = "https://www.googleapis.com/books/v1/volumes/$id";
-$livroData = json_decode(file_get_contents($baseUrl), true);
+$id = $_GET['id'] ?? null;
+if (!$id) die("ID do livro não informado.");
+
+$baseUrl = "https://www.googleapis.com/books/v1/volumes/" . urlencode($id);
+$livroJson = @file_get_contents($baseUrl);
+$livroData = $livroJson ? json_decode($livroJson, true) : null;
 
 if (!$livroData || isset($livroData["error"])) {
     die("Livro não encontrado.");
 }
 
 $info = $livroData["volumeInfo"] ?? [];
+$webReaderLink = $livroData["accessInfo"]["webReaderLink"] ?? ($info["previewLink"] ?? "");
 
-// 📚 Informações principais
 $titulo = $info["title"] ?? "Título indisponível";
 $autores = isset($info["authors"]) ? implode(", ", $info["authors"]) : "Autor não informado";
-$descricao = $info["description"] ?? "Sem descrição disponível";
+$descricaoOriginal = $info["description"] ?? "";
 $nota = isset($info["averageRating"]) ? number_format($info["averageRating"], 1) : "-";
 $lancamento = $info["publishedDate"] ?? "Desconhecida";
 $categorias = isset($info["categories"]) ? implode(", ", $info["categories"]) : "Sem categorias";
-$poster = $info["imageLinks"]["thumbnail"] 
-    ?? "https://via.placeholder.com/300x450?text=Sem+Imagem";
 
-// Comentários do usuário
-$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarioslivro WHERE livro_id = ? ORDER BY data_hora ASC");
+$poster = $info["imageLinks"]["thumbnail"] ?? "https://via.placeholder.com/300x450?text=Sem+Imagem";
+
+$stmt2 = $conn->prepare("SELECT usuario, texto, data_hora, nota FROM comentarioslivro WHERE livro_id = ? ORDER BY data_hora DESC");
 $stmt2->execute([$id]);
 $comentarios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
@@ -46,7 +50,7 @@ $media = $mediaStmt->fetchColumn();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Critix - Livro</title>
+<title>Critix</title>
 <link rel="shortcut icon" href="Adobe_Express_-_file40px.png" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -55,52 +59,41 @@ $media = $mediaStmt->fetchColumn();
     --cinza-escuro: #343A40;
     --azul-petroleo: #007B83;
     --coral: #FF6B6B;
-    --cinza: #1e1e2f;
-    --cinza-claro: #2a2a40;
-    --texto: #f5f5f5;
-    --cinza-div: #343A40;
-    --cinza-diretor: rgba(30,30,40,0.95);
-    --estrela-cheia: #FFD700;
+    --transparente-preto: rgba(52, 58, 64, 0.9);
 }
 
-* { margin:0; padding:0; box-sizing:border-box; font-family: "Poppins", sans-serif; }
-html, body { width:100vw; min-height:100vh; overflow-x: hidden; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins", sans-serif; }
+html, body { width:100vw; min-height:100vh; overflow-x:hidden; }
 
 body {
-    font-family: "Poppins", Arial, Helvetica, sans-serif;
     background: linear-gradient(135deg, #1e1e2f, #007B83);
     background-size: 800% 800%;
     animation: gradientMove 120s ease infinite;
     color: var(--branco-gelo);
-    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-    justify-content: flex-start;
-    padding: 20px;
-    color: var(--texto);
-    background: linear-gradient(135deg, var(--cinza), #007B83);
-    background-size: 800% 800%;
-    animation: gradientMove 120s ease infinite;
+    padding: 40px 20px;
 }
-
-@keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
 #emoji-bg {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
     pointer-events: none;
-    z-index: -1;
+    z-index: 0;
 }
 .emoji {
     position: absolute;
-    font-size: 24px;
-    animation: float 10s linear infinite;
-    opacity: 0.5 + Math.random()*0.5;
+    animation: float linear infinite;
+    opacity: 0.25;
+    filter: blur(0.5px);
 }
 @keyframes float {
     0% { transform: translateY(100vh) rotate(0deg); }
@@ -112,18 +105,15 @@ header {
     font-size: 70px;
     text-align: center;
     color: var(--coral);
-    text-shadow: 0 0 25px rgba(255,107,107,0.7);
-    margin-bottom: 30px;
-    text-align: center;
-    z-index: 2;
+    text-shadow: 0 0 20px rgba(255,107,107,0.6);
+    margin: 20px 0;
+    z-index: 1;
 }
 
 #botao-voltar {
     position: absolute;
-    top: 20px;
-    left: 25px;
-    width: 32px;     
-    height: 32px;     
+    top: 20px; left: 25px;
+    width: 32px; height: 32px;
     border-left: 3px solid var(--coral);
     border-bottom: 3px solid var(--coral);
     transform: rotate(45deg);
@@ -131,82 +121,96 @@ header {
     transition: transform 0.2s;
     z-index: 2;
 }
-#botao-voltar:hover {
-    transform: rotate(45deg) scale(1.2);
+#botao-voltar:hover { transform: rotate(45deg) scale(1.2); }
+
+.card, #form-comentario, .comentario {
+    position: relative;
+    z-index: 1;
+    background-color: var(--transparente-preto);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+.card:hover, #form-comentario:hover, .comentario:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.7);
 }
 
 .card {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-    width: 90%;
-    max-width: 1200px;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 25px;
+    width: 95%;
+    max-width: 1100px;
     padding: 25px;
-    z-index: 2;
-    background: #343A40;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 0 12px 35px rgba(0,0,0,0.5);
-    color: var(--texto);
 }
 
-section { flex: 1; min-width: 300px; }
+#filme-img {
+    width: 260px;
+    border-radius: 16px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+}
 
-section h1 { color: var(--coral); font-size: 28px; margin-bottom: 10px; }
+section {
+    flex: 1;
+    min-width: 280px;
+    padding: 28px;
+    overflow-y: auto;
+    max-height: 72vh;
+    text-align: justify;
+}
+section h1 { font-size: 26px; color: var(--coral); margin-bottom: 12px; }
+section p { font-size: 16.5px; margin-bottom: 10px; line-height: 1.6; }
+section p strong { color: var(--coral); }
 
-section p { margin-bottom: 8px; font-size: 15px; line-height: 1.5; }
+#comentarios-e-avaliacao {
+    display: flex;
+    width: 95%;
+    max-width: 1100px;
+    margin-top: 30px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
 
 #form-comentario {
-    width: 100%;
-    max-width: 450px;
-    background: rgba(255,255,255,0.07);
+    flex: 0 0 48%;
     padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     gap: 15px;
-    transition: all 0.3s ease;
 }
 
-#form-comentario:hover { background: rgba(255,255,255,0.1); }
-
-#diretor {
-    text-align: center;
-    background: var(--cinza-diretor);
-    border-radius: 15px;
-    padding: 15px;
-    width: 260px; 
+#comentarios-container {
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 18px;
 }
 
-#diretor img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; }
-
-#diretor p { font-size: 14px; line-height: 1.3; margin: 0; }
-
-.nota-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
+.comentario {
+    padding: 16px 20px;
+    font-size: 14px;
+    width: calc(50% - 10px);
+    min-width: 260px;
 }
-.nota-label { font-weight: 600; font-size: 16px; color: #f5f5f5; }
+.comentario strong { color: var(--coral); }
+
 .estrelas {
     display: flex;
-    gap: 6px;
     flex-direction: row-reverse;
-    justify-content: flex-start;
-    margin-top: 5px;
+    justify-content: flex-end;
+    gap: 6px;
 }
 .estrelas input { display: none; }
 .estrelas label {
     font-size: 26px;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.4);
     cursor: pointer;
     transition: 0.2s;
 }
@@ -216,6 +220,7 @@ section p { margin-bottom: 8px; font-size: 15px; line-height: 1.5; }
     color: #FFD700;
     transform: scale(1.3);
 }
+
 #form-comentario textarea {
     width: 100%;
     height: 110px;
@@ -224,17 +229,11 @@ section p { margin-bottom: 8px; font-size: 15px; line-height: 1.5; }
     border-radius: 12px;
     border: none;
     resize: none;
-    background: rgba(255,255,255,0.12);
-    color: #f5f5f5;
-    transition: 0.3s;
-}
-#form-comentario textarea:focus {
-    outline: none;
-    background: rgba(255,255,255,0.2);
-    box-shadow: 0 0 10px rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.1);
+    color: var(--branco-gelo);
 }
 #form-comentario button {
-    background: linear-gradient(135deg, #FF6B6B, #007B83);
+    background: linear-gradient(135deg, var(--azul-petroleo), var(--coral));
     color: #fff;
     border: none;
     padding: 10px 22px;
@@ -243,187 +242,119 @@ section p { margin-bottom: 8px; font-size: 15px; line-height: 1.5; }
     cursor: pointer;
     transition: 0.3s;
 }
-#comentarios {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px;
-    flex: 1;
+#form-comentario button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px var(--coral);
 }
-.comentario {
-    display: flex;
-    flex-direction: column;
-    background: rgba(255,255,255,0.08);
-    border-radius: 18px;
-    padding: 16px;
-    min-width: 220px;
-    max-width: 280px;
-    font-size: 14px;
-    transition: transform 0.3s, box-shadow 0.3s;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-.comentario:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
-.comentario-header { font-size: 13px; color: var(--texto); opacity: 0.9; margin-bottom: 8px; }
-.comentario-texto { font-size: 14px; line-height: 1.5; word-break: break-word; color: #f0f0f0; }
-.comentario strong { color: var(--coral); }
-
-#emoji-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
-.emoji { position: absolute; font-size: 24px; animation: float 15s linear infinite; opacity: 0.2; }
-@keyframes float { 0% { transform: translateY(100vh) rotate(0deg); } 100% { transform: translateY(-10vh) rotate(360deg); } }
-#comentarios-e-avaliacao {
-    display: flex;
-    gap: 30px;
-    width: 100%;
-    max-width: 250px;
-    border-radius: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-#aside-esquerda {
-    flex: 1 1 240px;
-    text-align: center;
-}
-#aside-esquerda img {
-    width: 100%;
-    max-width: 250px;
-    border-radius: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-#aside-esquerda p { margin-top: 12px; font-size: 16px; }
-
-section {
-    flex: 2 1 500px;
-    background-color: #343A40; 
-    border-radius: 22px;
-    padding: 28px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: justify;
-    overflow-y: auto;
-    max-height: 72vh;
-    scrollbar-width: thin;
-    scrollbar-color: var(--coral) transparent;
-}
-section::-webkit-scrollbar { width: 6px; }
-section::-webkit-scrollbar-thumb { background: var(--coral); border-radius: 10px; }
-
-section h1 {
-    font-size: 26px;
-    color: var(--coral);
-    margin-bottom: 12px;
-}
-section p {
-    font-size: 16.5px;
-    margin-bottom: 10px;
-    line-height: 1.6;
-}
-section p strong {
-    color: var(--coral);
-}
-
-#aside-direita {
-    flex: 1 1 240px;
-    background-color: #343A40; 
-    padding: 25px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    text-align: center;
-}
-#aside-direita img {
-    width: 80%;
-    max-width: 110px;
-    border-radius: 50%;
-    margin-bottom: 10px;
-}
-#aside-direita p { font-size: 15.5px; margin-bottom: 8px; }
 
 @media(max-width:900px){
+    #comentarios-e-avaliacao { flex-direction: column; }
+    #form-comentario, #comentarios-container { flex: 1 1 100%; }
+    .comentario { width: 100%; }
     .card { flex-direction: column; align-items: center; }
-    #filme-img, #diretor { width: 80%; max-width: 260px; }
-    section { width: 90%; }
-    #comentarios-e-avaliacao { flex-direction: column; gap: 20px; }
-    #form-comentario { width: 100%; max-width: 100%; padding: 20px; }
-    .estrelas label { font-size: 24px; }
-    #comentarios { width: 100%; justify-content: center; }
 }
 </style>
 </head>
 <body>
 <div id="emoji-bg"></div>
-
-<header>Critix</header>
 <a href="index.php" id="botao-voltar"></a>
+<header>Critix</header>
 
-<div class="container">
-    <aside id="aside-esquerda">
-        <img src="<?= $poster ?>" alt="<?= htmlspecialchars($titulo) ?>">
-        <p><strong>Publicado:</strong> <?= htmlspecialchars($lancamento) ?></p>
-    </aside>
-
+<div class="card">
+    <img id="filme-img" src="<?= htmlspecialchars($poster) ?>" alt="<?= htmlspecialchars($titulo) ?>">
     <section>
         <h1><?= htmlspecialchars($titulo) ?></h1>
         <p><strong>Autores:</strong> <?= htmlspecialchars($autores) ?></p>
-        <p><strong>Média dos usuários:</strong> <?= $media ? $media : "Sem avaliações ainda" ?></p>
-        <p><strong>Nota Google Books:</strong> <?= $nota ?></p>
+        <p><strong>Média dos usuários:</strong> <span id="media-usuarios"><?= $media ? htmlspecialchars($media) : "Sem avaliações ainda" ?></span></p>
+        <p><strong>Nota Google Books:</strong> <?= htmlspecialchars($nota) ?></p>
         <p><strong>Categorias:</strong> <?= htmlspecialchars($categorias) ?></p>
-        <p><?= nl2br(htmlspecialchars($descricao)) ?></p>
+        <p><strong>Publicado:</strong> <?= htmlspecialchars($lancamento) ?></p>
+        <p style="margin-top:12px;"><?= nl2br(htmlspecialchars($descricaoOriginal)) ?></p>
+        <?php if (!empty($webReaderLink)): ?>
+            <div style="margin-top:18px; text-align:center;">
+                <a href="<?= htmlspecialchars($webReaderLink) ?>" target="_blank"
+                   style="display:inline-block;background:#2e2e38;color:white;font-weight:bold;border:none;padding:12px 25px;border-radius:15px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,0.4);transition:all 0.3s ease;"
+                   onmouseover="this.style.transform='scale(1.07)'; this.style.background='#3e3e4a';"
+                   onmouseout="this.style.transform='scale(1)'; this.style.background='#2e2e38';">
+                   Ver no Google Books
+                </a>
+            </div>
+        <?php endif; ?>
     </section>
+</div>
 
-    <aside id="aside-direita">
-        <h3>Informações</h3>
-        <p><strong>ISBN:</strong> <?= htmlspecialchars($info["industryIdentifiers"][0]["identifier"] ?? "Não informado") ?></p>
-        <p><strong>Páginas:</strong> <?= $info["pageCount"] ?? "Não informado" ?></p>
-        <p><strong>Editora:</strong> <?= htmlspecialchars($info["publisher"] ?? "Não informada") ?></p>
-    </aside>
-
-    <!-- Seção de comentários -->
-    <div id="comentarios">
-        <h2>Comentários</h2>
-
-        <form action="comentarioLivro.php" method="post">
+<div id="comentarios-e-avaliacao">
+    <div id="form-comentario">
+        <form id="avaliacao-form">
             <input type="hidden" name="livro_id" value="<?= htmlspecialchars($id) ?>">
-            <label>Avaliação (0 a 10):</label><br>
-            <div class="notas">
-                <?php for ($i = 10; $i >= 0; $i--): ?>
-                <input type="radio" id="nota<?= $i ?>" name="nota" value="<?= $i ?>" required>
-                <label for="nota<?= $i ?>"><?= $i ?></label>
+            <p><strong>Avaliações</strong></p>
+            <div class="estrelas">
+                <?php for ($i = 10; $i >= 1; $i--): ?>
+                    <input type="radio" id="estrela<?= $i ?>" name="nota" value="<?= $i ?>">
+                    <label for="estrela<?= $i ?>">★</label>
                 <?php endfor; ?>
             </div>
-            <textarea name="texto" rows="4" placeholder="Escreva seu comentário..." required></textarea> <br>
-            <input type="hidden" name="spoiler" value="0">
-            <input type="checkbox" id="spoiler" name="spoiler" value="1">
-            <label for="spoiler"> Comentário com spoiler?</label><br><br>
-            <button type="submit">Enviar comentário</button>
+            <textarea name="texto" placeholder="Escreva seu comentário..." required></textarea>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="spoiler" name="spoiler" value="1">
+                <label for="spoiler" style="font-size:14px; color:#f2f2f2;">Comentário com spoiler?</label>
+            </div>
+            <button type="submit">Enviar</button>
         </form>
-        <hr>
+    </div>
+
+    <div id="comentarios-container">
         <?php if ($comentarios): ?>
-            <?php foreach ($comentarios as $c): ?>
+            <?php foreach($comentarios as $c): ?>
                 <div class="comentario">
-                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — 
-                    <?= htmlspecialchars($c['nota']) ?> — <?= date('d/m/Y H:i', strtotime($c['data_hora'])) ?><br>
+                    <strong><?= htmlspecialchars($c['usuario']) ?></strong> — <?= date("d/m/Y H:i", strtotime($c['data_hora'])) ?><br>
+                    Nota: <?= htmlspecialchars($c['nota']) ?><br><br>
                     <?= nl2br(htmlspecialchars($c['texto'])) ?>
                 </div>
             <?php endforeach; ?>
-        <?php else: ?>
-            <p style="text-align:center; opacity:0.7;">Ainda não há comentários.</p>
         <?php endif; ?>
     </div>
 </div>
 
 <script>
-// Mesma lógica de emojis flutuantes do filme.php
-const emojis = ['📚','🎓','📖','🤓','🎉','⭐','🤩'];
-const emojiContainer = document.getElementById('emoji-bg');
-for(let i=0; i<25; i++){
+const emojis = ['📚','⭐','🎉','📖','🎬','🍿','🎭'];
+const container = document.getElementById('emoji-bg');
+for(let i=0;i<20;i++){
     const span = document.createElement('span');
     span.classList.add('emoji');
     span.textContent = emojis[Math.floor(Math.random()*emojis.length)];
-    span.style.left = Math.random()*100 + 'vw';
-    span.style.fontSize = 16 + Math.random()*28 + 'px';
-    span.style.animationDuration = 6 + Math.random()*8 + 's';
-    span.style.opacity = 0.6 + Math.random()*0.4;
-    emojiContainer.appendChild(span);
+    span.style.left = Math.random()*100+"vw";
+    span.style.fontSize = (14+Math.random()*20)+"px";
+    span.style.animationDuration = (10+Math.random()*10)+"s";
+    span.style.opacity = 0.15 + Math.random()*0.15;
+    container.appendChild(span);
 }
+
+const form = document.getElementById('avaliacao-form');
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    let formData = new FormData(this);
+
+    fetch('comentarioLivro.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success){
+            const container = document.getElementById('comentarios-container');
+            const div = document.createElement('div');
+            div.classList.add('comentario');
+            div.innerHTML = `<strong>${data.usuario}</strong> — ${data.data_hora}<br>Nota: ${data.nota}<br><br>${data.texto}`;
+            container.prepend(div);
+            document.getElementById('media-usuarios').innerText = data.media;
+            form.reset();
+        } else {
+            alert("Erro ao enviar comentário.");
+        }
+    })
+    .catch(err => console.error(err));
+});
 </script>
 </body>
 </html>
